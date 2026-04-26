@@ -8,6 +8,7 @@ const startServer = async () => {
 
     const server = app.listen(env.PORT, () => {
       console.log(`Server listening on port ${env.PORT}`);
+      console.log(`Client URL: http://localhost:${env.PORT}`);
     });
 
     const shutdown = async (signal: string) => {

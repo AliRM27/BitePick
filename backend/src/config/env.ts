@@ -15,6 +15,7 @@ const envSchema = z.object({
   CLIENT_URL: z.string().url().default("http://localhost:8081"),
   JWT_SECRET: z.string().min(16, "JWT_SECRET must be at least 16 characters"),
   JWT_EXPIRES_IN: z.string().min(1).default("7d"),
+  GOOGLE_PLACES_API_KEY: z.string().min(1, "GOOGLE_PLACES_API_KEY is required"),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

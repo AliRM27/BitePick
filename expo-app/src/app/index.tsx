@@ -1,98 +1,248 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+} from "react-native-reanimated";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { PickButton } from "@/components/pick-button";
+import { ThemedText } from "@/components/themed-text";
+import { Spacing } from "@/constants/theme";
+import { useLocation } from "@/hooks/use-location";
+import { useTheme } from "@/hooks/use-theme";
+import { pickRestaurant } from "@/services/restaurant";
+import type { Restaurant } from "@/types/restaurant";
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
+/* ------------------------------------------------------------------ */
+/*  Rotating subtitle suggestions                                      */
+/* ------------------------------------------------------------------ */
+
+const SUGGESTIONS = [
+  "Craving something new? 🌮",
+  "Hungry? Let us decide. 🍜",
+  "Skip the endless scrolling. 🍕",
+  "One tap. One pick. Let's go. 🍔",
+  "Trust the algorithm. 🍣",
+];
+
+function useRotatingText(items: string[], intervalMs = 3000) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % items.length);
+    }, intervalMs);
+    return () => clearInterval(timer);
+  }, [items.length, intervalMs]);
+
+  return items[index];
 }
+
+/* ------------------------------------------------------------------ */
+/*  Home Screen                                                        */
+/* ------------------------------------------------------------------ */
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const theme = useTheme();
+  const { getLocation } = useLocation();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const subtitle = useRotatingText(SUGGESTIONS);
+  const lastLocationRef = useRef<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  // Floating animation for the hero emoji
+  const floatY = useSharedValue(0);
+
+  useEffect(() => {
+    floatY.value = withRepeat(
+      withSequence(
+        withTiming(-8, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(8, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+      ),
+      -1,
+      true,
+    );
+  }, [floatY]);
+
+  const floatStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: floatY.value }],
+  }));
+
+  const handlePick = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // 1. Get location
+      const coords = await getLocation();
+      if (!coords) {
+        setLoading(false);
+        return; // Permission denied — error shown by hook
+      }
+
+      lastLocationRef.current = coords;
+
+      // 2. Call backend
+      const result = await pickRestaurant(coords.latitude, coords.longitude);
+
+      if (!result.data.restaurants || result.data.restaurants.length === 0) {
+        setError(
+          "No great restaurants found nearby. Try expanding your search area.",
+        );
+        setLoading(false);
+        return;
+      }
+
+      // 3. Navigate to result screen with data
+      router.push({
+        pathname: "/result",
+        params: {
+          restaurants: JSON.stringify(result.data.restaurants),
+          userLat: coords.latitude.toString(),
+          userLng: coords.longitude.toString(),
+        },
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, [getLocation, router]);
+
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <Animated.View
+            entering={FadeIn.duration(600).delay(200)}
+            style={floatStyle}
+          >
+            <ThemedText style={styles.heroEmoji}>🍽️</ThemedText>
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.duration(600).delay(400)}>
+            <ThemedText style={[styles.title, { color: theme.text }]}>
+              Where should{"\n"}I eat?
+            </ThemedText>
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.duration(600).delay(600)}>
+            <ThemedText
+              style={[styles.subtitle, { color: theme.textSecondary }]}
+              key={subtitle} // Re-render on change
+            >
+              {subtitle}
+            </ThemedText>
+          </Animated.View>
+        </View>
+
+        {/* Bottom Section */}
+        <Animated.View
+          entering={FadeInUp.duration(600).delay(800)}
+          style={styles.bottomSection}
+        >
+          {/* Error message */}
+          {error && (
+            <View
+              style={[
+                styles.errorContainer,
+                { backgroundColor: "rgba(239, 68, 68, 0.1)" },
+              ]}
+            >
+              <ThemedText style={styles.errorText}>{error}</ThemedText>
+            </View>
+          )}
+
+          {/* Pick Button */}
+          <PickButton onPress={handlePick} loading={loading} />
+
+          {/* Compare placeholder */}
+          <ThemedText
+            style={[styles.compareText, { color: theme.textSecondary }]}
+          >
+            Compare manually → coming soon
           </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
+        </Animated.View>
       </SafeAreaView>
-    </ThemedView>
+    </View>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*  Styles                                                             */
+/* ------------------------------------------------------------------ */
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    justifyContent: "space-between",
+    paddingBottom: Spacing.five,
   },
   heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
     flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.three,
     paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  },
+  heroEmoji: {
+    fontSize: 52,
+    marginBottom: Spacing.two,
   },
   title: {
-    textAlign: 'center',
+    fontSize: 42,
+    fontWeight: "800",
+    textAlign: "center",
+    lineHeight: 50,
+    letterSpacing: -1,
   },
-  code: {
-    textTransform: 'uppercase',
+  subtitle: {
+    fontSize: 17,
+    fontWeight: "500",
+    textAlign: "center",
+    marginTop: Spacing.two,
   },
-  stepContainer: {
+  bottomSection: {
     gap: Spacing.three,
-    alignSelf: 'stretch',
+    alignItems: "center",
+    paddingHorizontal: Spacing.four,
+  },
+  errorContainer: {
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    paddingVertical: Spacing.two,
+    borderRadius: 12,
+    width: "100%",
+  },
+  errorText: {
+    color: "#EF4444",
+    fontSize: 14,
+    fontWeight: "500",
+    textAlign: "center",
+  },
+  compareText: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginTop: Spacing.one,
   },
 });
