@@ -5,9 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   Easing,
   FadeIn,
-  FadeInDown,
   FadeInUp,
-  SlideInRight,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
@@ -302,11 +300,7 @@ export default function ResultScreen() {
         {/* Restaurant Card with animation on change */}
         <Animated.View
           key={animationKey}
-          entering={
-            currentIndex === 0
-              ? FadeInDown.duration(500).delay(100)
-              : SlideInRight.duration(300).springify().damping(18)
-          }
+          entering={FadeIn.duration(250)}
           style={styles.cardContainer}
         >
           <RestaurantCard
