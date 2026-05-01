@@ -7,7 +7,8 @@ import { pickRequestSchema } from "../validators/restaurantValidator";
 /**
  * POST /api/v1/restaurants/pick
  *
- * Accepts user coordinates, fetches nearby restaurants from Google Places,
+ * Accepts user coordinates + optional context,
+ * fetches nearby restaurants from Google Places,
  * scores them, and returns the top-ranked options.
  */
 export async function pickRestaurant(req: Request, res: Response) {
@@ -23,11 +24,16 @@ export async function pickRestaurant(req: Request, res: Response) {
     return;
   }
 
-  const { latitude, longitude, radius } = parsed.data;
+  const { latitude, longitude, radius, context } = parsed.data;
 
   try {
-    // 1. Fetch nearby restaurants from Google Places
-    const places = await fetchNearbyRestaurants(latitude, longitude, radius);
+    // 1. Fetch nearby restaurants from Google Places (context-aware)
+    const places = await fetchNearbyRestaurants(
+      latitude,
+      longitude,
+      2000,
+      context,
+    );
 
     if (places.length === 0) {
       res.status(200).json({
@@ -61,6 +67,7 @@ export async function pickRestaurant(req: Request, res: Response) {
           totalFetched: places.length,
           totalQualified: ranked.length,
           radiusMeters: radius,
+          context,
         },
       },
     });

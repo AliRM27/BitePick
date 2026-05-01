@@ -1,7 +1,8 @@
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -16,11 +17,21 @@ import Animated, {
 
 import { PickButton } from "@/components/pick-button";
 import { ThemedText } from "@/components/themed-text";
-import { Spacing } from "@/constants/theme";
+import { BorderRadius, Spacing } from "@/constants/theme";
 import { useLocation } from "@/hooks/use-location";
 import { useTheme } from "@/hooks/use-theme";
 import { pickRestaurant } from "@/services/restaurant";
-import type { Restaurant } from "@/types/restaurant";
+import type { FoodContext } from "@/types/restaurant";
+
+/* ------------------------------------------------------------------ */
+/*  Context options                                                    */
+/* ------------------------------------------------------------------ */
+
+const CONTEXT_OPTIONS: { key: FoodContext; emoji: string; label: string }[] = [
+  { key: "coffee", emoji: "☕", label: "Coffee" },
+  { key: "food", emoji: "🍝", label: "Food" },
+  { key: "quick_bite", emoji: "⚡", label: "Quick bite" },
+];
 
 /* ------------------------------------------------------------------ */
 /*  Rotating subtitle suggestions                                      */
@@ -48,6 +59,81 @@ function useRotatingText(items: string[], intervalMs = 3000) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Context Selector                                                   */
+/* ------------------------------------------------------------------ */
+
+function ContextSelector({
+  selected,
+  onSelect,
+}: {
+  selected: FoodContext;
+  onSelect: (ctx: FoodContext) => void;
+}) {
+  const theme = useTheme();
+
+  return (
+    <View style={ctxStyles.container}>
+      {CONTEXT_OPTIONS.map((opt) => {
+        const isActive = selected === opt.key;
+        return (
+          <Pressable
+            key={opt.key}
+            onPress={() => {
+              // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              Haptics.selectionAsync();
+              onSelect(opt.key);
+            }}
+            style={[
+              ctxStyles.pill,
+              {
+                backgroundColor: isActive
+                  ? theme.accent
+                  : theme.backgroundElement,
+                borderColor: isActive ? theme.accent : theme.border,
+              },
+            ]}
+          >
+            <ThemedText style={ctxStyles.emoji}>{opt.emoji}</ThemedText>
+            <ThemedText
+              style={[
+                ctxStyles.label,
+                { color: isActive ? "#FFFFFF" : theme.textSecondary },
+              ]}
+            >
+              {opt.label}
+            </ThemedText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+const ctxStyles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "center",
+  },
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1.5,
+  },
+  emoji: {
+    fontSize: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+});
+
+/* ------------------------------------------------------------------ */
 /*  Home Screen                                                        */
 /* ------------------------------------------------------------------ */
 
@@ -57,6 +143,7 @@ export default function HomeScreen() {
   const { getLocation } = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [context, setContext] = useState<FoodContext>("food");
   const subtitle = useRotatingText(SUGGESTIONS);
   const lastLocationRef = useRef<{
     latitude: number;
@@ -90,23 +177,29 @@ export default function HomeScreen() {
       const coords = await getLocation();
       if (!coords) {
         setLoading(false);
-        return; // Permission denied — error shown by hook
+        return;
       }
 
       lastLocationRef.current = coords;
 
-      // 2. Call backend
-      const result = await pickRestaurant(coords.latitude, coords.longitude);
+      // 2. Call backend with context
+      const result = await pickRestaurant(
+        coords.latitude,
+        coords.longitude,
+        3000,
+        context,
+      );
 
       if (!result.data.restaurants || result.data.restaurants.length === 0) {
         setError(
-          "No great restaurants found nearby. Try expanding your search area.",
+          "No great options found nearby. Try a different category or location.",
         );
         setLoading(false);
         return;
       }
 
       // 3. Navigate to result screen with data
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.push({
         pathname: "/result",
         params: {
@@ -124,7 +217,7 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
     }
-  }, [getLocation, router]);
+  }, [getLocation, router, context]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -147,7 +240,7 @@ export default function HomeScreen() {
           <Animated.View entering={FadeInDown.duration(600).delay(600)}>
             <ThemedText
               style={[styles.subtitle, { color: theme.textSecondary }]}
-              key={subtitle} // Re-render on change
+              key={subtitle}
             >
               {subtitle}
             </ThemedText>
@@ -170,6 +263,9 @@ export default function HomeScreen() {
               <ThemedText style={styles.errorText}>{error}</ThemedText>
             </View>
           )}
+
+          {/* Context Selector */}
+          <ContextSelector selected={context} onSelect={setContext} />
 
           {/* Pick Button */}
           <PickButton onPress={handlePick} loading={loading} />

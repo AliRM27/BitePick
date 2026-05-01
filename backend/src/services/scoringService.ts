@@ -25,6 +25,7 @@ export interface ScoredRestaurant {
   lng: number;
   priceLevel?: string;
   reason: PickReason;
+  explanation: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -115,7 +116,7 @@ function classifyReason(
 ): PickReason {
   if (rank === 0) return "top_pick";
 
-  const isVeryClose = distanceKm < maxDistanceKm * 0.3; // within 30% of max radius
+  const isVeryClose = distanceKm < maxDistanceKm * 0.3;
   const isPopular = restaurant.userRatingCount >= 200;
   const isHighlyRated = restaurant.rating >= 4.5;
   const isHiddenGem = restaurant.rating >= 4.3 && restaurant.userRatingCount < 100;
@@ -125,10 +126,76 @@ function classifyReason(
   if (isVeryClose) return "closest";
   if (isHiddenGem) return "hidden_gem";
 
-  // Fallback based on dominant quality
   if (restaurant.rating >= 4.5) return "best_rated";
   if (distanceKm < 1) return "closest";
   return "popular";
+}
+
+/* ------------------------------------------------------------------ */
+/*  Dynamic Explanation Generator                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Generate a data-driven explanation string.
+ *
+ * Examples:
+ *   "Best rated within 3 min"
+ *   "Popular spot · 1.2k reviews"
+ *   "Highly rated and close by"
+ *   "Great reviews, just 500m away"
+ */
+function generateExplanation(
+  rating: number,
+  reviewCount: number,
+  distanceKm: number,
+  durationMinutes: number,
+  reason: PickReason
+): string {
+  const isVeryClose = durationMinutes <= 5;
+  const isHighRating = rating >= 4.5;
+  const isPopular = reviewCount >= 200;
+  const isVeryPopular = reviewCount >= 500;
+
+  // Format helpers
+  const durationStr = durationMinutes <= 1 ? "1 min" : `${durationMinutes} min`;
+  const distStr =
+    distanceKm < 1
+      ? `${Math.round(distanceKm * 1000)}m away`
+      : `${distanceKm.toFixed(1)}km away`;
+  const reviewStr =
+    reviewCount >= 1000
+      ? `${(reviewCount / 1000).toFixed(1)}k reviews`
+      : `${reviewCount} reviews`;
+
+  // Priority-based explanation
+  if (reason === "top_pick") {
+    if (isHighRating && isVeryClose) return `Best rated within ${durationStr}`;
+    if (isHighRating) return `Highest rated nearby · ${rating}★`;
+    if (isVeryClose) return `Top pick · just ${distStr}`;
+    return `Best overall match near you`;
+  }
+
+  if (reason === "best_rated") {
+    if (isVeryClose) return `${rating}★ rating · only ${distStr}`;
+    return `Highly rated · ${rating}★ with ${reviewStr}`;
+  }
+
+  if (reason === "popular") {
+    if (isVeryPopular && isVeryClose) return `Popular spot · ${reviewStr} · ${distStr}`;
+    if (isVeryPopular) return `Loved by many · ${reviewStr}`;
+    return `Popular choice · ${reviewStr}`;
+  }
+
+  if (reason === "closest") {
+    if (isHighRating) return `Great reviews · just ${distStr}`;
+    return `${rating}★ rated · only ${durationStr} away`;
+  }
+
+  if (reason === "hidden_gem") {
+    return `Under the radar · ${rating}★ with ${reviewStr}`;
+  }
+
+  return `${rating}★ · ${distStr}`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -136,23 +203,23 @@ function classifyReason(
 /* ------------------------------------------------------------------ */
 
 const MIN_RATING = 4.0;
-const RATING_WEIGHT = 0.5;
-const DISTANCE_WEIGHT = 0.3;
-const POPULARITY_WEIGHT = 0.2;
+const MIN_REVIEWS = 20;
+const RATING_WEIGHT = 0.45;
+const DISTANCE_WEIGHT = 0.4;
+const POPULARITY_WEIGHT = 0.15;
 
 /**
  * Score and rank restaurants based on confidence-weighted rating,
  * proximity, and popularity.
  *
  * Score formula:
- *   score = weightedRating/5 * 0.5
- *         + (1 - distance/maxDistance) * 0.3
- *         + popularityFactor * 0.2
+ *   score = weightedRating/5 * RATING_WEIGHT
+ *         + exp(-distance/1.5) * DISTANCE_WEIGHT
+ *         + popularityFactor * POPULARITY_WEIGHT
+ *         + proximityBonus - farPenalty
  *
- * popularityFactor = min(1, log10(reviewCount + 1) / log10(1001))
- *   → 1 review ≈ 0, 100 reviews ≈ 0.67, 1000 reviews ≈ 1.0
- *
- * - Filters out restaurants below MIN_RATING (4.0)
+ * - Filters out restaurants below MIN_RATING (4.0) and MIN_REVIEWS (20)
+ * - Uses exponential distance decay to strongly favor nearby places
  * - Returns top `limit` results, sorted by score descending
  */
 export function scoreAndRank(
@@ -162,16 +229,27 @@ export function scoreAndRank(
   maxDistanceKm: number = 5,
   limit: number = 10
 ): ScoredRestaurant[] {
-  // Filter by minimum rating
-  const qualified = restaurants.filter((r) => r.rating >= MIN_RATING);
+  // Filter by minimum rating and review count to remove low-trust places
+  const qualified = restaurants.filter(
+    (r) => r.rating >= MIN_RATING && r.userRatingCount >= MIN_REVIEWS
+  );
 
   // Calculate distance, score, and reason for each restaurant
   const scored = qualified
     .map((r) => {
       const distanceKm = haversineDistance(userLat, userLng, r.lat, r.lng);
 
-      // Clamp distance factor between 0 and 1
-      const distanceFactor = Math.max(0, 1 - distanceKm / maxDistanceKm);
+      // Exponential distance decay — strongly favors nearby places
+      const distanceFactor = Math.exp(-distanceKm / 1.5);
+
+      // Proximity bonus for very close places
+      const proximityBonus =
+        distanceKm < 0.5 ? 0.2 :
+        distanceKm < 1 ? 0.1 :
+        0;
+
+      // Far distance penalty
+      const farPenalty = distanceKm > 3 ? 0.15 : 0;
 
       // Confidence-weighted rating (Bayesian)
       const adjustedRating = confidenceWeightedRating(r.rating, r.userRatingCount);
@@ -186,7 +264,9 @@ export function scoreAndRank(
       const score =
         ratingFactor * RATING_WEIGHT +
         distanceFactor * DISTANCE_WEIGHT +
-        popularityFactor * POPULARITY_WEIGHT;
+        popularityFactor * POPULARITY_WEIGHT +
+        proximityBonus -
+        farPenalty;
 
       return {
         placeId: r.placeId,
@@ -217,12 +297,21 @@ export function scoreAndRank(
     return a.distanceKm - b.distanceKm;
   });
 
-  // Assign reasons after sorting (rank matters for "top_pick")
+  // Assign reasons and dynamic explanations after sorting
   const results: ScoredRestaurant[] = scored.slice(0, limit).map((r, index) => {
     const { _raw, _distanceKm, ...rest } = r;
+    const reason = classifyReason(_raw, _distanceKm, index, maxDistanceKm);
+    const explanation = generateExplanation(
+      r.rating,
+      r.userRatingCount,
+      r.distanceKm,
+      r.durationMinutes,
+      reason
+    );
     return {
       ...rest,
-      reason: classifyReason(_raw, _distanceKm, index, maxDistanceKm),
+      reason,
+      explanation,
     };
   });
 

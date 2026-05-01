@@ -1,16 +1,15 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
 import Animated, {
-  Easing,
   FadeIn,
   FadeInUp,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
   withSpring,
-  withTiming,
 } from "react-native-reanimated";
 
 import { RestaurantCard } from "@/components/restaurant-card";
@@ -20,7 +19,7 @@ import { useTheme } from "@/hooks/use-theme";
 import type { Restaurant } from "@/types/restaurant";
 
 /* ------------------------------------------------------------------ */
-/*  Animated "Alternative pick" button                                 */
+/*  "Alternative pick" button                                          */
 /* ------------------------------------------------------------------ */
 
 function AlternativePickButton({
@@ -32,76 +31,41 @@ function AlternativePickButton({
 }) {
   const theme = useTheme();
 
-  // Bounce animation on each press
   const scale = useSharedValue(1);
-  const shimmerX = useSharedValue(-1);
 
-  // Subtle shimmer to attract taps
-  useEffect(() => {
-    const interval = setInterval(() => {
-      shimmerX.value = withSequence(
-        withTiming(1, { duration: 600, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-1, { duration: 0 }),
-      );
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [shimmerX]);
-
-  const buttonAnimStyle = useAnimatedStyle(() => ({
+  const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
-  const shimmerStyle = useAnimatedStyle(() => ({
-    opacity: shimmerX.value > 0 ? 0.08 : 0,
-    transform: [{ translateX: shimmerX.value * 150 }],
-  }));
-
   const handlePress = () => {
-    // Satisfying bounce on tap
+    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.selectionAsync();
     scale.value = withSequence(
-      withSpring(0.92, { damping: 10, stiffness: 400 }),
-      withSpring(1.03, { damping: 8, stiffness: 300 }),
-      withSpring(1, { damping: 12, stiffness: 250 }),
+      withSpring(0.95, { damping: 12, stiffness: 400 }),
+      withSpring(1, { damping: 10, stiffness: 300 }),
     );
     onPress();
   };
 
   return (
-    <Animated.View style={buttonAnimStyle}>
+    <Animated.View style={[{ width: "100%" }, animStyle]}>
       <Pressable
         onPress={handlePress}
-        style={[
+        style={({ pressed }) => [
           altStyles.button,
           {
             backgroundColor: theme.backgroundElement,
             borderColor: theme.border,
           },
+          pressed && { opacity: 0.8 },
         ]}
       >
-        {/* Shimmer overlay */}
-        <Animated.View
-          style={[
-            altStyles.shimmer,
-            { backgroundColor: theme.accent },
-            shimmerStyle,
-          ]}
-        />
-
-        <View style={altStyles.content}>
-          <ThemedText style={altStyles.icon}>🔀</ThemedText>
-          <View style={altStyles.textColumn}>
-            <ThemedText
-              style={[altStyles.label, { color: theme.text }]}
-            >
-              Alternative pick
-            </ThemedText>
-            <ThemedText
-              style={[altStyles.hint, { color: theme.textSecondary }]}
-            >
-              {remaining} more {remaining === 1 ? "option" : "options"} nearby
-            </ThemedText>
-          </View>
-        </View>
+        <ThemedText style={[altStyles.label, { color: theme.text }]}>
+          Try another
+        </ThemedText>
+        <ThemedText style={[altStyles.count, { color: theme.textSecondary }]}>
+          {remaining} left
+        </ThemedText>
       </Pressable>
     </Animated.View>
   );
@@ -110,41 +74,21 @@ function AlternativePickButton({
 const altStyles = StyleSheet.create({
   button: {
     width: "100%",
+    height: 50,
     borderRadius: BorderRadius.lg,
-    borderWidth: 1.5,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    overflow: "hidden",
-    position: "relative",
-  },
-  shimmer: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    width: 80,
-    borderRadius: BorderRadius.lg,
-  },
-  content: {
+    borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 12,
-  },
-  icon: {
-    fontSize: 22,
-  },
-  textColumn: {
-    alignItems: "flex-start",
+    gap: 8,
   },
   label: {
-    fontSize: 17,
-    fontWeight: "700",
-    letterSpacing: 0.2,
+    fontSize: 16,
+    fontWeight: "600",
   },
-  hint: {
-    fontSize: 12,
+  count: {
+    fontSize: 13,
     fontWeight: "500",
-    marginTop: 1,
   },
 });
 
@@ -152,16 +96,9 @@ const altStyles = StyleSheet.create({
 /*  Progress Dots                                                      */
 /* ------------------------------------------------------------------ */
 
-function ProgressDots({
-  total,
-  current,
-}: {
-  total: number;
-  current: number;
-}) {
+function ProgressDots({ total, current }: { total: number; current: number }) {
   const theme = useTheme();
 
-  // Only show dots if there are few results
   if (total > 8) return null;
 
   return (
@@ -172,7 +109,8 @@ function ProgressDots({
           style={[
             dotStyles.dot,
             {
-              backgroundColor: i === current ? theme.accent : theme.backgroundElement,
+              backgroundColor:
+                i === current ? theme.accent : theme.backgroundElement,
               width: i === current ? 20 : 8,
             },
           ]}
@@ -201,8 +139,7 @@ const dotStyles = StyleSheet.create({
 
 /**
  * Result Screen — shows ONE restaurant at a time.
- * User can tap "Alternative pick" to cycle through ranked options
- * with satisfying animations.
+ * User can navigate forward ("Alternative pick") and back ("Previous").
  */
 export default function ResultScreen() {
   const router = useRouter();
@@ -229,11 +166,19 @@ export default function ResultScreen() {
 
   const currentRestaurant = restaurants[currentIndex] ?? null;
   const hasMore = currentIndex < restaurants.length - 1;
+  const hasPrevious = currentIndex > 0;
   const remaining = restaurants.length - 1 - currentIndex;
 
   const handleTryAnother = () => {
     if (hasMore) {
       setCurrentIndex((prev) => prev + 1);
+      setAnimationKey((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (hasPrevious) {
+      setCurrentIndex((prev) => prev - 1);
       setAnimationKey((prev) => prev + 1);
     }
   };
@@ -258,9 +203,13 @@ export default function ResultScreen() {
           </ThemedText>
           <Pressable
             onPress={handleGoBack}
-            style={[styles.backButton, { backgroundColor: theme.accent }]}
+            style={({ pressed }) => [
+              styles.emptyBackButton,
+              { backgroundColor: theme.accent },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+            ]}
           >
-            <ThemedText style={styles.backButtonText}>Go back</ThemedText>
+            <ThemedText style={styles.emptyBackButtonText}>Go back</ThemedText>
           </Pressable>
         </SafeAreaView>
       </View>
@@ -277,7 +226,7 @@ export default function ResultScreen() {
             style={({ pressed }) => [
               styles.headerButton,
               { backgroundColor: theme.backgroundElement },
-              pressed && { opacity: 0.7 },
+              pressed && { opacity: 0.7, transform: [{ scale: 0.96 }] },
             ]}
           >
             <ThemedText
@@ -287,7 +236,6 @@ export default function ResultScreen() {
             </ThemedText>
           </Pressable>
 
-          {/* Progress dots */}
           <ProgressDots total={restaurants.length} current={currentIndex} />
 
           <ThemedText
@@ -297,7 +245,7 @@ export default function ResultScreen() {
           </ThemedText>
         </Animated.View>
 
-        {/* Restaurant Card with animation on change */}
+        {/* Restaurant Card */}
         <Animated.View
           key={animationKey}
           entering={FadeIn.duration(250)}
@@ -310,11 +258,12 @@ export default function ResultScreen() {
           />
         </Animated.View>
 
-        {/* Bottom Actions */}
+        {/* Bottom Actions — clear hierarchy */}
         <Animated.View
           entering={FadeInUp.duration(500).delay(300)}
           style={styles.bottomActions}
         >
+          {/* Primary row: Alternative Pick */}
           {hasMore ? (
             <AlternativePickButton
               onPress={handleTryAnother}
@@ -324,7 +273,10 @@ export default function ResultScreen() {
             <View
               style={[
                 styles.noMoreContainer,
-                { backgroundColor: theme.accentSoft, borderColor: theme.border },
+                {
+                  backgroundColor: theme.accentSoft,
+                  borderColor: theme.border,
+                },
               ]}
             >
               <ThemedText style={styles.noMoreEmoji}>🎯</ThemedText>
@@ -334,6 +286,23 @@ export default function ResultScreen() {
                 You've seen all the top picks nearby!
               </ThemedText>
             </View>
+          )}
+
+          {/* Previous button — subtle, only visible when applicable */}
+          {hasPrevious && (
+            <Pressable
+              onPress={handlePrevious}
+              style={({ pressed }) => [
+                styles.previousButton,
+                pressed && { opacity: 0.6, transform: [{ scale: 0.97 }] },
+              ]}
+            >
+              <ThemedText
+                style={[styles.previousText, { color: theme.textSecondary }]}
+              >
+                ← Previous pick
+              </ThemedText>
+            </Pressable>
           )}
         </Animated.View>
       </SafeAreaView>
@@ -382,10 +351,22 @@ const styles = StyleSheet.create({
   },
   // Bottom
   bottomActions: {
-    paddingTop: Spacing.three,
+    paddingTop: Spacing.two,
     gap: Spacing.two,
+    alignItems: "center",
   },
+  // Previous
+  previousButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  previousText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  // No more
   noMoreContainer: {
+    width: "100%",
     padding: Spacing.three,
     borderRadius: BorderRadius.lg,
     alignItems: "center",
@@ -421,13 +402,13 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     textAlign: "center",
   },
-  backButton: {
+  emptyBackButton: {
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: BorderRadius.lg,
     marginTop: Spacing.three,
   },
-  backButtonText: {
+  emptyBackButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",

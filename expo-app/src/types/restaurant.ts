@@ -5,6 +5,8 @@ export type PickReason =
   | "popular"
   | "hidden_gem";
 
+export type FoodContext = "food" | "coffee" | "quick_bite";
+
 export interface Restaurant {
   placeId: string;
   name: string;
@@ -19,8 +21,8 @@ export interface Restaurant {
   lng: number;
   priceLevel?: string;
   reason: PickReason;
+  explanation: string;
 }
-
 
 export interface PickResponse {
   success: boolean;
@@ -31,6 +33,7 @@ export interface PickResponse {
       totalFetched: number;
       totalQualified: number;
       radiusMeters: number;
+      context?: FoodContext;
     };
   };
 }

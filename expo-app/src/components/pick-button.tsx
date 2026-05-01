@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -76,6 +77,7 @@ export function PickButton({ onPress, loading = false, disabled = false }: PickB
 
   const handlePressIn = () => {
     pressScale.value = withSpring(0.95, { damping: 15, stiffness: 200 });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   const handlePressOut = () => {

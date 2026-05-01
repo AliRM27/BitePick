@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export const FoodContext = z.enum(["food", "coffee", "quick_bite"]);
+export type FoodContextType = z.infer<typeof FoodContext>;
+
 export const pickRequestSchema = z.object({
   latitude: z
     .number()
@@ -15,6 +18,7 @@ export const pickRequestSchema = z.object({
     .min(500, "Radius must be at least 500 meters")
     .max(10000, "Radius must be at most 10,000 meters")
     .default(3000),
+  context: FoodContext.default("food"),
 });
 
 export type PickRequest = z.infer<typeof pickRequestSchema>;
