@@ -31,7 +31,7 @@ export async function pickRestaurant(req: Request, res: Response) {
     const places = await fetchNearbyRestaurants(
       latitude,
       longitude,
-      2000,
+      radius,
       context,
     );
 

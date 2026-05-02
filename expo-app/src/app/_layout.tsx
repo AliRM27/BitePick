@@ -1,11 +1,15 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import React from 'react';
-import { useColorScheme } from 'react-native';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { Stack } from "expo-router";
+import React from "react";
+import { useColorScheme } from "react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import { Colors } from '@/constants/theme';
+import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import { Colors } from "@/constants/theme";
 
 const queryClient = new QueryClient();
 
@@ -15,8 +19,8 @@ const queryClient = new QueryClient();
  */
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const colors = Colors[isDark ? 'dark' : 'light'];
+  const isDark = colorScheme === "dark";
+  const colors = Colors[isDark ? "dark" : "light"];
 
   // Customize the navigation themes to match BitePick branding
   const BitePickDark = {
@@ -50,7 +54,7 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            animation: 'slide_from_right',
+            animation: "slide_from_right",
             contentStyle: { backgroundColor: colors.background },
           }}
         >
@@ -58,8 +62,10 @@ export default function RootLayout() {
           <Stack.Screen
             name="result"
             options={{
-              animation: 'slide_from_bottom',
-              gestureEnabled: true,
+              gestureEnabled: false,
+              headerTransparent: true,
+              headerShadowVisible: false,
+              title: "",
             }}
           />
         </Stack>

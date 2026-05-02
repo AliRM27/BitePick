@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -217,96 +217,101 @@ export default function ResultScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
-        <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
-          <Pressable
-            onPress={handleGoBack}
-            style={({ pressed }) => [
-              styles.headerButton,
-              { backgroundColor: theme.backgroundElement },
-              pressed && { opacity: 0.7, transform: [{ scale: 0.96 }] },
-            ]}
-          >
-            <ThemedText
-              style={[styles.headerButtonText, { color: theme.text }]}
-            >
-              ← Back
-            </ThemedText>
-          </Pressable>
-
-          <ProgressDots total={restaurants.length} current={currentIndex} />
-
-          <ThemedText
-            style={[styles.counterText, { color: theme.textSecondary }]}
-          >
-            {currentIndex + 1}/{restaurants.length}
-          </ThemedText>
-        </Animated.View>
-
-        {/* Restaurant Card */}
-        <Animated.View
-          key={animationKey}
-          entering={FadeIn.duration(250)}
-          style={styles.cardContainer}
-        >
-          <RestaurantCard
-            restaurant={currentRestaurant}
-            userLat={userLat}
-            userLng={userLng}
-          />
-        </Animated.View>
-
-        {/* Bottom Actions — clear hierarchy */}
-        <Animated.View
-          entering={FadeInUp.duration(500).delay(300)}
-          style={styles.bottomActions}
-        >
-          {/* Primary row: Alternative Pick */}
-          {hasMore ? (
-            <AlternativePickButton
-              onPress={handleTryAnother}
-              remaining={remaining}
-            />
-          ) : (
-            <View
-              style={[
-                styles.noMoreContainer,
-                {
-                  backgroundColor: theme.accentSoft,
-                  borderColor: theme.border,
-                },
-              ]}
-            >
-              <ThemedText style={styles.noMoreEmoji}>🎯</ThemedText>
-              <ThemedText
-                style={[styles.noMoreText, { color: theme.textSecondary }]}
-              >
-                You've seen all the top picks nearby!
-              </ThemedText>
-            </View>
-          )}
-
-          {/* Previous button — subtle, only visible when applicable */}
-          {hasPrevious && (
+    <>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <SafeAreaView style={styles.safeArea}>
+          <Stack.Toolbar placement="left">
+            <Stack.Toolbar.Button onPress={handleGoBack} icon={"xmark"} />
+          </Stack.Toolbar>
+          {/* Header */}
+          {/* <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
             <Pressable
-              onPress={handlePrevious}
+              onPress={handleGoBack}
               style={({ pressed }) => [
-                styles.previousButton,
-                pressed && { opacity: 0.6, transform: [{ scale: 0.97 }] },
+                styles.headerButton,
+                { backgroundColor: theme.backgroundElement },
+                pressed && { opacity: 0.7, transform: [{ scale: 0.96 }] },
               ]}
             >
               <ThemedText
-                style={[styles.previousText, { color: theme.textSecondary }]}
+                style={[styles.headerButtonText, { color: theme.text }]}
               >
-                ← Previous pick
+                ← Back
               </ThemedText>
             </Pressable>
-          )}
-        </Animated.View>
-      </SafeAreaView>
-    </View>
+
+            <ProgressDots total={restaurants.length} current={currentIndex} />
+
+            <ThemedText
+              style={[styles.counterText, { color: theme.textSecondary }]}
+            >
+              {currentIndex + 1}/{restaurants.length}
+            </ThemedText>
+          </Animated.View> */}
+
+          {/* Restaurant Card */}
+          <Animated.View
+            key={animationKey}
+            entering={FadeIn.duration(250)}
+            style={styles.cardContainer}
+          >
+            <RestaurantCard
+              restaurant={currentRestaurant}
+              userLat={userLat}
+              userLng={userLng}
+            />
+          </Animated.View>
+
+          {/* Bottom Actions — clear hierarchy */}
+          <Animated.View
+            entering={FadeInUp.duration(500).delay(300)}
+            style={styles.bottomActions}
+          >
+            {/* Primary row: Alternative Pick */}
+            {hasMore ? (
+              <AlternativePickButton
+                onPress={handleTryAnother}
+                remaining={remaining}
+              />
+            ) : (
+              <View
+                style={[
+                  styles.noMoreContainer,
+                  {
+                    backgroundColor: theme.accentSoft,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
+                <ThemedText style={styles.noMoreEmoji}>🎯</ThemedText>
+                <ThemedText
+                  style={[styles.noMoreText, { color: theme.textSecondary }]}
+                >
+                  You've seen all the top picks nearby!
+                </ThemedText>
+              </View>
+            )}
+
+            {/* Previous button — subtle, only visible when applicable */}
+            {hasPrevious && (
+              <Pressable
+                onPress={handlePrevious}
+                style={({ pressed }) => [
+                  styles.previousButton,
+                  pressed && { opacity: 0.6, transform: [{ scale: 0.97 }] },
+                ]}
+              >
+                <ThemedText
+                  style={[styles.previousText, { color: theme.textSecondary }]}
+                >
+                  ← Previous pick
+                </ThemedText>
+              </Pressable>
+            )}
+          </Animated.View>
+        </SafeAreaView>
+      </View>
+    </>
   );
 }
 
