@@ -248,6 +248,9 @@ export default function ResultScreen() {
               {currentIndex + 1}/{restaurants.length}
             </ThemedText>
           </Animated.View> */}
+          <View style={{ paddingTop: 20 }}>
+            <ProgressDots total={restaurants.length} current={currentIndex} />
+          </View>
 
           {/* Restaurant Card */}
           <Animated.View
