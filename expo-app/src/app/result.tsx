@@ -99,7 +99,7 @@ const altStyles = StyleSheet.create({
 function ProgressDots({ total, current }: { total: number; current: number }) {
   const theme = useTheme();
 
-  if (total > 8) return null;
+  if (total > 10) return null;
 
   return (
     <View style={dotStyles.container}>
@@ -110,7 +110,7 @@ function ProgressDots({ total, current }: { total: number; current: number }) {
             dotStyles.dot,
             {
               backgroundColor:
-                i === current ? theme.accent : theme.backgroundElement,
+                i === current ? theme.accent : theme.backgroundSelected,
               width: i === current ? 20 : 8,
             },
           ]}
@@ -258,11 +258,7 @@ export default function ResultScreen() {
             entering={FadeIn.duration(250)}
             style={styles.cardContainer}
           >
-            <RestaurantCard
-              restaurant={currentRestaurant}
-              userLat={userLat}
-              userLng={userLng}
-            />
+            <RestaurantCard restaurant={currentRestaurant} />
           </Animated.View>
 
           {/* Bottom Actions — clear hierarchy */}

@@ -27,30 +27,26 @@ const REASON_BADGE: Record<PickReason, { emoji: string; label: string }> = {
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
-  userLat?: number | null;
-  userLng?: number | null;
 }
 
 /**
  * Premium restaurant result card.
  * Shows reason badge, photo, name, dynamic explanation, rating, distance, and CTA.
  */
-export function RestaurantCard({
-  restaurant,
-  userLat,
-  userLng,
-}: RestaurantCardProps) {
+export function RestaurantCard({ restaurant }: RestaurantCardProps) {
   const theme = useTheme();
   const badge = REASON_BADGE[restaurant.reason] || REASON_BADGE.top_pick;
 
   const handleGoThere = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const destination = `${restaurant.lat},${restaurant.lng}`;
-    const origin = userLat && userLng ? `${userLat},${userLng}` : null;
 
-    const url = origin
-      ? `http://maps.apple.com/?saddr=${origin}&daddr=${destination}&dirflg=w`
-      : `http://maps.apple.com/?daddr=${destination}&dirflg=w`;
+    // Use the restaurant name as a search query near its coordinates.
+    // This opens the actual place listing (photos, reviews, hours)
+    // instead of just a pin on raw coordinates.
+    const name = encodeURIComponent(restaurant.name);
+    const ll = `${restaurant.lat},${restaurant.lng}`;
+
+    const url = `http://maps.apple.com/?q=${name}&near=${ll}`;
 
     Linking.openURL(url);
   };

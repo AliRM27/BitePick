@@ -112,23 +112,24 @@ function ContextSelector({
 const ctxStyles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    gap: 10,
+    gap: 12,
     justifyContent: "center",
+    flexWrap: "wrap",
   },
   pill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
     borderRadius: BorderRadius.full,
     borderWidth: 1.5,
   },
   emoji: {
-    fontSize: 16,
+    fontSize: 18,
   },
   label: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "600",
   },
 });
@@ -303,7 +304,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
   },
   heroEmoji: {
-    fontSize: 52,
+    fontSize: 64,
+    lineHeight: 80,
     marginBottom: Spacing.two,
   },
   title: {
@@ -320,9 +322,10 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
   bottomSection: {
-    gap: Spacing.three,
+    gap: Spacing.five,
     alignItems: "center",
     paddingHorizontal: Spacing.four,
+    paddingBottom: Spacing.two,
   },
   errorContainer: {
     paddingHorizontal: Spacing.three,
