@@ -1,6 +1,6 @@
 const API_BASE =
   process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, "") ||
-  "https://n3h703b4-7979.euw.devtunnels.ms/api";
+  "https://bitepick.fly.dev/api";
 
 let authToken: string | null = null;
 
