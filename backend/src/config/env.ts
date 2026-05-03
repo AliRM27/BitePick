@@ -12,7 +12,7 @@ const envSchema = z.object({
     .string()
     .min(1, "MONGODB_URI is required")
     .default("mongodb://127.0.0.1:27017/bitepick"),
-  CLIENT_URL: z.string().url().default("http://localhost:8081"),
+  CLIENT_URL: z.string().min(1).default("*"),
   JWT_SECRET: z.string().min(16, "JWT_SECRET must be at least 16 characters"),
   JWT_EXPIRES_IN: z.string().min(1).default("7d"),
   GOOGLE_PLACES_API_KEY: z.string().min(1, "GOOGLE_PLACES_API_KEY is required"),
