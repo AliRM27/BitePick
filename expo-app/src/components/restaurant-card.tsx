@@ -36,6 +36,7 @@ interface RestaurantCardProps {
 export function RestaurantCard({ restaurant }: RestaurantCardProps) {
   const theme = useTheme();
   const badge = REASON_BADGE[restaurant.reason] || REASON_BADGE.top_pick;
+  const photoIdentity = restaurant.photoUrl ?? restaurant.placeId;
 
   const handleGoThere = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -88,10 +89,12 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           ]}
         >
           <Image
+            key={photoIdentity}
+            recyclingKey={photoIdentity}
             source={{ uri: restaurant.photoUrl }}
             style={styles.photo}
             contentFit="cover"
-            transition={300}
+            transition={0}
           />
         </View>
       ) : (

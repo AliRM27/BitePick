@@ -5,12 +5,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import Animated, {
   Easing,
-  useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
-  FadeIn,
   FadeInDown,
   FadeInUp,
 } from "react-native-reanimated";
@@ -32,6 +30,13 @@ const CONTEXT_OPTIONS: { key: FoodContext; emoji: string; label: string }[] = [
   { key: "food", emoji: "🍝", label: "Food" },
   { key: "quick_bite", emoji: "⚡", label: "Quick bite" },
 ];
+
+const RADIUS_OPTIONS = [
+  { meters: 500, label: "0.5 km" },
+  { meters: 1000, label: "1 km" },
+  { meters: 3000, label: "3 km" },
+  { meters: 5000, label: "5 km" },
+] as const;
 
 /* ------------------------------------------------------------------ */
 /*  Rotating subtitle suggestions                                      */
@@ -135,6 +140,116 @@ const ctxStyles = StyleSheet.create({
 });
 
 /* ------------------------------------------------------------------ */
+/*  Radius Selector                                                    */
+/* ------------------------------------------------------------------ */
+
+function RadiusSelector({
+  selected,
+  onSelect,
+}: {
+  selected: number;
+  onSelect: (radius: number) => void;
+}) {
+  const theme = useTheme();
+  const selectedLabel =
+    RADIUS_OPTIONS.find((option) => option.meters === selected)?.label ??
+    `${selected / 1000} km`;
+
+  return (
+    <View style={radiusStyles.container}>
+      <View style={radiusStyles.header}>
+        <ThemedText
+          style={[radiusStyles.title, { color: theme.textSecondary }]}
+        >
+          Radius
+        </ThemedText>
+        <ThemedText style={[radiusStyles.value, { color: theme.text }]}>
+          {selectedLabel}
+        </ThemedText>
+      </View>
+
+      <View
+        style={[
+          radiusStyles.segmentedControl,
+          {
+            backgroundColor: theme.backgroundElement,
+            borderColor: theme.border,
+          },
+        ]}
+      >
+        {RADIUS_OPTIONS.map((option) => {
+          const isActive = selected === option.meters;
+
+          return (
+            <Pressable
+              key={option.meters}
+              onPress={() => {
+                Haptics.selectionAsync();
+                onSelect(option.meters);
+              }}
+              style={[
+                radiusStyles.option,
+                isActive && { backgroundColor: theme.accent },
+              ]}
+            >
+              <ThemedText
+                style={[
+                  radiusStyles.optionLabel,
+                  { color: isActive ? "#FFFFFF" : theme.textSecondary },
+                ]}
+              >
+                {option.label}
+              </ThemedText>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+const radiusStyles = StyleSheet.create({
+  container: {
+    width: "100%",
+    gap: Spacing.two,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.one,
+  },
+  title: {
+    fontSize: 13,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  value: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  segmentedControl: {
+    width: "100%",
+    flexDirection: "row",
+    gap: 4,
+    padding: 4,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  option: {
+    flex: 1,
+    minHeight: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: BorderRadius.md,
+  },
+  optionLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+});
+
+/* ------------------------------------------------------------------ */
 /*  Home Screen                                                        */
 /* ------------------------------------------------------------------ */
 
@@ -145,6 +260,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [context, setContext] = useState<FoodContext>("food");
+  const [radiusMeters, setRadiusMeters] = useState(3000);
   const subtitle = useRotatingText(SUGGESTIONS);
   const lastLocationRef = useRef<{
     latitude: number;
@@ -165,10 +281,6 @@ export default function HomeScreen() {
     );
   }, [floatY]);
 
-  const floatStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: floatY.value }],
-  }));
-
   const handlePick = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -187,13 +299,13 @@ export default function HomeScreen() {
       const result = await pickRestaurant(
         coords.latitude,
         coords.longitude,
-        3000,
+        radiusMeters,
         context,
       );
 
       if (!result.data.restaurants || result.data.restaurants.length === 0) {
         setError(
-          "No great options found nearby. Try a different category or location.",
+          "No great options found nearby. Try a larger radius, different category, or location.",
         );
         setLoading(false);
         return;
@@ -218,20 +330,13 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
     }
-  }, [getLocation, router, context]);
+  }, [getLocation, router, radiusMeters, context]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         {/* Hero Section */}
         <View style={styles.heroSection}>
-          <Animated.View
-            entering={FadeIn.duration(600).delay(200)}
-            style={floatStyle}
-          >
-            <ThemedText style={styles.heroEmoji}>🍽️</ThemedText>
-          </Animated.View>
-
           <Animated.View entering={FadeInDown.duration(600).delay(400)}>
             <ThemedText style={[styles.title, { color: theme.text }]}>
               Where should{"\n"}I eat?
@@ -267,6 +372,9 @@ export default function HomeScreen() {
 
           {/* Context Selector */}
           <ContextSelector selected={context} onSelect={setContext} />
+
+          {/* Radius Selector */}
+          <RadiusSelector selected={radiusMeters} onSelect={setRadiusMeters} />
 
           {/* Pick Button */}
           <PickButton onPress={handlePick} loading={loading} />
@@ -322,7 +430,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
   bottomSection: {
-    gap: Spacing.five,
+    gap: Spacing.three,
     alignItems: "center",
     paddingHorizontal: Spacing.four,
     paddingBottom: Spacing.two,

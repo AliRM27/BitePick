@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -8,9 +8,9 @@ import Animated, {
   FadeIn,
   interpolate,
   runOnJS,
+  runOnUI,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 
@@ -22,6 +22,7 @@ import type { Restaurant } from "@/types/restaurant";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.15;
+const CARD_ENTRY_OFFSET = SCREEN_WIDTH * 0.4;
 
 /* ------------------------------------------------------------------ */
 /*  Progress Dots                                                      */
@@ -121,6 +122,7 @@ export default function ResultScreen() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showHint, setShowHint] = useState(true);
+  const [entryOffset, setEntryOffset] = useState(0);
 
   const currentRestaurant = restaurants[currentIndex] ?? null;
   const hasMore = currentIndex < restaurants.length - 1;
@@ -134,18 +136,32 @@ export default function ResultScreen() {
   const goNext = useCallback(() => {
     Haptics.selectionAsync();
     setShowHint(false);
+    setEntryOffset(CARD_ENTRY_OFFSET);
     setCurrentIndex((prev) => Math.min(prev + 1, restaurants.length - 1));
   }, [restaurants.length]);
 
   const goPrevious = useCallback(() => {
     Haptics.selectionAsync();
     setShowHint(false);
+    setEntryOffset(-CARD_ENTRY_OFFSET);
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
   }, []);
 
   const edgeBounce = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }, []);
+
+  useLayoutEffect(() => {
+    if (entryOffset === 0) return;
+
+    runOnUI((offset: number) => {
+      "worklet";
+
+      translateX.value = offset;
+      translateX.value = withTiming(0, { duration: 150 });
+    })(entryOffset);
+    setEntryOffset(0);
+  }, [currentIndex, entryOffset, translateX]);
 
   // --- Pan gesture ---
 
@@ -169,25 +185,21 @@ export default function ResultScreen() {
       const swipedRight = event.translationX > SWIPE_THRESHOLD;
 
       if (swipedLeft && hasMore) {
-        // Animate card off to the left, then reset
+        // Animate card off to the left. The next card enters after React commits the new index.
         translateX.value = withTiming(
           -SCREEN_WIDTH,
           { duration: 150 },
           () => {
             runOnJS(goNext)();
-            translateX.value = SCREEN_WIDTH * 0.4;
-            translateX.value = withTiming(0, { duration: 150 });
           },
         );
       } else if (swipedRight && hasPrevious) {
-        // Animate card off to the right, then reset
+        // Animate card off to the right. The previous card enters after React commits the new index.
         translateX.value = withTiming(
           SCREEN_WIDTH,
           { duration: 150 },
           () => {
             runOnJS(goPrevious)();
-            translateX.value = -SCREEN_WIDTH * 0.4;
-            translateX.value = withTiming(0, { duration: 150 });
           },
         );
       } else {
@@ -272,7 +284,10 @@ export default function ResultScreen() {
           {/* Swipeable Restaurant Card */}
           <GestureDetector gesture={panGesture}>
             <Animated.View style={[styles.cardContainer, cardAnimStyle]}>
-              <RestaurantCard restaurant={currentRestaurant} />
+              <RestaurantCard
+                key={currentRestaurant.placeId}
+                restaurant={currentRestaurant}
+              />
             </Animated.View>
           </GestureDetector>
 
