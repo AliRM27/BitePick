@@ -6,6 +6,7 @@ import {
 import { Stack } from "expo-router";
 import React from "react";
 import { useColorScheme } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
@@ -48,28 +49,30 @@ export default function RootLayout() {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={isDark ? BitePickDark : BitePickLight}>
-        <AnimatedSplashOverlay />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: "slide_from_right",
-            contentStyle: { backgroundColor: colors.background },
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen
-            name="result"
-            options={{
-              gestureEnabled: false,
-              headerTransparent: true,
-              headerShadowVisible: false,
-              title: "",
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider value={isDark ? BitePickDark : BitePickLight}>
+          <AnimatedSplashOverlay />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: "slide_from_right",
+              contentStyle: { backgroundColor: colors.background },
             }}
-          />
-        </Stack>
-      </ThemeProvider>
-    </QueryClientProvider>
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen
+              name="result"
+              options={{
+                gestureEnabled: false,
+                headerTransparent: true,
+                headerShadowVisible: false,
+                title: "",
+              }}
+            />
+          </Stack>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

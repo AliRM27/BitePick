@@ -1,15 +1,17 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   FadeIn,
-  FadeInUp,
+  interpolate,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withSequence,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
 
 import { RestaurantCard } from "@/components/restaurant-card";
@@ -18,79 +20,8 @@ import { BorderRadius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import type { Restaurant } from "@/types/restaurant";
 
-/* ------------------------------------------------------------------ */
-/*  "Alternative pick" button                                          */
-/* ------------------------------------------------------------------ */
-
-function AlternativePickButton({
-  onPress,
-  remaining,
-}: {
-  onPress: () => void;
-  remaining: number;
-}) {
-  const theme = useTheme();
-
-  const scale = useSharedValue(1);
-
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePress = () => {
-    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Haptics.selectionAsync();
-    scale.value = withSequence(
-      withSpring(0.95, { damping: 12, stiffness: 400 }),
-      withSpring(1, { damping: 10, stiffness: 300 }),
-    );
-    onPress();
-  };
-
-  return (
-    <Animated.View style={[{ width: "100%" }, animStyle]}>
-      <Pressable
-        onPress={handlePress}
-        style={({ pressed }) => [
-          altStyles.button,
-          {
-            backgroundColor: theme.backgroundElement,
-            borderColor: theme.border,
-          },
-          pressed && { opacity: 0.8 },
-        ]}
-      >
-        <ThemedText style={[altStyles.label, { color: theme.text }]}>
-          Try another
-        </ThemedText>
-        <ThemedText style={[altStyles.count, { color: theme.textSecondary }]}>
-          {remaining} left
-        </ThemedText>
-      </Pressable>
-    </Animated.View>
-  );
-}
-
-const altStyles = StyleSheet.create({
-  button: {
-    width: "100%",
-    height: 50,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  count: {
-    fontSize: 13,
-    fontWeight: "500",
-  },
-});
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.15;
 
 /* ------------------------------------------------------------------ */
 /*  Progress Dots                                                      */
@@ -134,12 +65,42 @@ const dotStyles = StyleSheet.create({
 });
 
 /* ------------------------------------------------------------------ */
+/*  Swipe Hint                                                         */
+/* ------------------------------------------------------------------ */
+
+function SwipeHint({ visible }: { visible: boolean }) {
+  const theme = useTheme();
+
+  if (!visible) return null;
+
+  return (
+    <Animated.View entering={FadeIn.duration(600).delay(800)} style={hintStyles.container}>
+      <ThemedText style={[hintStyles.text, { color: theme.textSecondary }]}>
+        ← Swipe for more picks →
+      </ThemedText>
+    </Animated.View>
+  );
+}
+
+const hintStyles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  text: {
+    fontSize: 13,
+    fontWeight: "500",
+    letterSpacing: 0.3,
+  },
+});
+
+/* ------------------------------------------------------------------ */
 /*  Result Screen                                                      */
 /* ------------------------------------------------------------------ */
 
 /**
  * Result Screen — shows ONE restaurant at a time.
- * User can navigate forward ("Alternative pick") and back ("Previous").
+ * Swipe left/right to navigate between picks.
  */
 export default function ResultScreen() {
   const router = useRouter();
@@ -158,30 +119,101 @@ export default function ResultScreen() {
     }
   }, [params.restaurants]);
 
-  const userLat = params.userLat ? parseFloat(params.userLat) : null;
-  const userLng = params.userLng ? parseFloat(params.userLng) : null;
-
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [animationKey, setAnimationKey] = useState(0);
+  const [showHint, setShowHint] = useState(true);
 
   const currentRestaurant = restaurants[currentIndex] ?? null;
   const hasMore = currentIndex < restaurants.length - 1;
   const hasPrevious = currentIndex > 0;
-  const remaining = restaurants.length - 1 - currentIndex;
 
-  const handleTryAnother = () => {
-    if (hasMore) {
-      setCurrentIndex((prev) => prev + 1);
-      setAnimationKey((prev) => prev + 1);
-    }
-  };
+  // Shared values for gesture
+  const translateX = useSharedValue(0);
 
-  const handlePrevious = () => {
-    if (hasPrevious) {
-      setCurrentIndex((prev) => prev - 1);
-      setAnimationKey((prev) => prev + 1);
-    }
-  };
+  // --- Navigation callbacks (called from gesture worklet via runOnJS) ---
+
+  const goNext = useCallback(() => {
+    Haptics.selectionAsync();
+    setShowHint(false);
+    setCurrentIndex((prev) => Math.min(prev + 1, restaurants.length - 1));
+  }, [restaurants.length]);
+
+  const goPrevious = useCallback(() => {
+    Haptics.selectionAsync();
+    setShowHint(false);
+    setCurrentIndex((prev) => Math.max(prev - 1, 0));
+  }, []);
+
+  const edgeBounce = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, []);
+
+  // --- Pan gesture ---
+
+  const panGesture = Gesture.Pan()
+    .activeOffsetX([-10, 10])
+    .failOffsetY([-15, 15])
+    .onUpdate((event) => {
+      // Dampen at edges
+      const atLeftEdge = !hasPrevious && event.translationX > 0;
+      const atRightEdge = !hasMore && event.translationX < 0;
+
+      if (atLeftEdge || atRightEdge) {
+        // Rubber-band effect at edges
+        translateX.value = event.translationX * 0.2;
+      } else {
+        translateX.value = event.translationX;
+      }
+    })
+    .onEnd((event) => {
+      const swipedLeft = event.translationX < -SWIPE_THRESHOLD;
+      const swipedRight = event.translationX > SWIPE_THRESHOLD;
+
+      if (swipedLeft && hasMore) {
+        // Animate card off to the left, then reset
+        translateX.value = withTiming(
+          -SCREEN_WIDTH,
+          { duration: 150 },
+          () => {
+            runOnJS(goNext)();
+            translateX.value = SCREEN_WIDTH * 0.4;
+            translateX.value = withTiming(0, { duration: 150 });
+          },
+        );
+      } else if (swipedRight && hasPrevious) {
+        // Animate card off to the right, then reset
+        translateX.value = withTiming(
+          SCREEN_WIDTH,
+          { duration: 150 },
+          () => {
+            runOnJS(goPrevious)();
+            translateX.value = -SCREEN_WIDTH * 0.4;
+            translateX.value = withTiming(0, { duration: 150 });
+          },
+        );
+      } else {
+        // Edge bounce or snap back
+        if (
+          (event.translationX > 20 && !hasPrevious) ||
+          (event.translationX < -20 && !hasMore)
+        ) {
+          runOnJS(edgeBounce)();
+        }
+        translateX.value = withTiming(0, {
+          duration: 150,
+        });
+      }
+    });
+
+  // --- Animated styles ---
+
+  const cardAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+    opacity: interpolate(
+      Math.abs(translateX.value),
+      [0, SCREEN_WIDTH * 0.6],
+      [1, 0.4],
+    ),
+  }));
 
   const handleGoBack = () => {
     router.back();
@@ -223,57 +255,34 @@ export default function ResultScreen() {
           <Stack.Toolbar placement="left">
             <Stack.Toolbar.Button onPress={handleGoBack} icon={"xmark"} />
           </Stack.Toolbar>
-          {/* Header */}
-          {/* <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
-            <Pressable
-              onPress={handleGoBack}
-              style={({ pressed }) => [
-                styles.headerButton,
-                { backgroundColor: theme.backgroundElement },
-                pressed && { opacity: 0.7, transform: [{ scale: 0.96 }] },
-              ]}
-            >
-              <ThemedText
-                style={[styles.headerButtonText, { color: theme.text }]}
-              >
-                ← Back
-              </ThemedText>
-            </Pressable>
 
+          {/* Progress dots + counter */}
+          <Animated.View
+            entering={FadeIn.duration(400)}
+            style={styles.header}
+          >
             <ProgressDots total={restaurants.length} current={currentIndex} />
-
             <ThemedText
               style={[styles.counterText, { color: theme.textSecondary }]}
             >
-              {currentIndex + 1}/{restaurants.length}
+              {currentIndex + 1} of {restaurants.length}
             </ThemedText>
-          </Animated.View> */}
-          <View style={{ paddingTop: 20 }}>
-            <ProgressDots total={restaurants.length} current={currentIndex} />
-          </View>
-
-          {/* Restaurant Card */}
-          <Animated.View
-            key={animationKey}
-            entering={FadeIn.duration(250)}
-            style={styles.cardContainer}
-          >
-            <RestaurantCard restaurant={currentRestaurant} />
           </Animated.View>
 
-          {/* Bottom Actions — clear hierarchy */}
-          <Animated.View
-            entering={FadeInUp.duration(500).delay(300)}
-            style={styles.bottomActions}
-          >
-            {/* Primary row: Alternative Pick */}
+          {/* Swipeable Restaurant Card */}
+          <GestureDetector gesture={panGesture}>
+            <Animated.View style={[styles.cardContainer, cardAnimStyle]}>
+              <RestaurantCard restaurant={currentRestaurant} />
+            </Animated.View>
+          </GestureDetector>
+
+          {/* Swipe hint + end state */}
+          <View style={styles.bottomArea}>
             {hasMore ? (
-              <AlternativePickButton
-                onPress={handleTryAnother}
-                remaining={remaining}
-              />
+              <SwipeHint visible={showHint} />
             ) : (
-              <View
+              <Animated.View
+                entering={FadeIn.duration(400)}
                 style={[
                   styles.noMoreContainer,
                   {
@@ -286,28 +295,11 @@ export default function ResultScreen() {
                 <ThemedText
                   style={[styles.noMoreText, { color: theme.textSecondary }]}
                 >
-                  You've seen all the top picks nearby!
+                  You've seen all the top picks!
                 </ThemedText>
-              </View>
+              </Animated.View>
             )}
-
-            {/* Previous button — subtle, only visible when applicable */}
-            {hasPrevious && (
-              <Pressable
-                onPress={handlePrevious}
-                style={({ pressed }) => [
-                  styles.previousButton,
-                  pressed && { opacity: 0.6, transform: [{ scale: 0.97 }] },
-                ]}
-              >
-                <ThemedText
-                  style={[styles.previousText, { color: theme.textSecondary }]}
-                >
-                  ← Previous pick
-                </ThemedText>
-              </Pressable>
-            )}
-          </Animated.View>
+          </View>
         </SafeAreaView>
       </View>
     </>
@@ -325,27 +317,18 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingHorizontal: Spacing.four,
-    paddingBottom: Spacing.four,
+    paddingBottom: Spacing.three,
   },
   // Header
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: Spacing.two,
-  },
-  headerButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: BorderRadius.sm,
-  },
-  headerButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
+    gap: 6,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   counterText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "600",
     fontVariant: ["tabular-nums"],
   },
   // Card
@@ -354,19 +337,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   // Bottom
-  bottomActions: {
+  bottomArea: {
     paddingTop: Spacing.two,
-    gap: Spacing.two,
+    minHeight: 48,
     alignItems: "center",
-  },
-  // Previous
-  previousButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  previousText: {
-    fontSize: 14,
-    fontWeight: "500",
+    justifyContent: "center",
   },
   // No more
   noMoreContainer: {
