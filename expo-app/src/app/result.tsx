@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
-import { Dimensions, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -20,9 +20,9 @@ import { BorderRadius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import type { Restaurant } from "@/types/restaurant";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.15;
-const CARD_ENTRY_OFFSET = SCREEN_WIDTH * 0.4;
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
 
 /* ------------------------------------------------------------------ */
 /*  Progress Dots                                                      */
@@ -106,6 +106,7 @@ const hintStyles = StyleSheet.create({
 export default function ResultScreen() {
   const router = useRouter();
   const theme = useTheme();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const params = useLocalSearchParams<{
     restaurants: string;
     userLat: string;
@@ -127,6 +128,33 @@ export default function ResultScreen() {
   const currentRestaurant = restaurants[currentIndex] ?? null;
   const hasMore = currentIndex < restaurants.length - 1;
   const hasPrevious = currentIndex > 0;
+  const swipeThreshold = screenWidth * 0.15;
+  const cardEntryOffset = screenWidth * 0.4;
+
+  const cardLayout = useMemo(() => {
+    const veryCompact = screenHeight < 660;
+    const compact = veryCompact || screenHeight < 740 || screenWidth < 360;
+    const cardHeight = veryCompact
+      ? clamp(screenHeight - 155, 412, 430)
+      : compact
+        ? clamp(screenHeight - 190, 440, 500)
+        : clamp(screenHeight - 260, 500, 560);
+    const photoHeight = Math.round(
+      clamp(
+        cardHeight * (veryCompact ? 0.28 : compact ? 0.31 : 0.34),
+        veryCompact ? 104 : 128,
+        veryCompact ? 112 : compact ? 150 : 180,
+      ),
+    );
+
+    return {
+      cardHeight,
+      compact,
+      horizontalPadding: screenWidth < 380 ? Spacing.three : Spacing.four,
+      photoHeight,
+      veryCompact,
+    };
+  }, [screenHeight, screenWidth]);
 
   // Shared values for gesture
   const translateX = useSharedValue(0);
@@ -136,16 +164,16 @@ export default function ResultScreen() {
   const goNext = useCallback(() => {
     Haptics.selectionAsync();
     setShowHint(false);
-    setEntryOffset(CARD_ENTRY_OFFSET);
+    setEntryOffset(cardEntryOffset);
     setCurrentIndex((prev) => Math.min(prev + 1, restaurants.length - 1));
-  }, [restaurants.length]);
+  }, [cardEntryOffset, restaurants.length]);
 
   const goPrevious = useCallback(() => {
     Haptics.selectionAsync();
     setShowHint(false);
-    setEntryOffset(-CARD_ENTRY_OFFSET);
+    setEntryOffset(-cardEntryOffset);
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
-  }, []);
+  }, [cardEntryOffset]);
 
   const edgeBounce = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -181,13 +209,13 @@ export default function ResultScreen() {
       }
     })
     .onEnd((event) => {
-      const swipedLeft = event.translationX < -SWIPE_THRESHOLD;
-      const swipedRight = event.translationX > SWIPE_THRESHOLD;
+      const swipedLeft = event.translationX < -swipeThreshold;
+      const swipedRight = event.translationX > swipeThreshold;
 
       if (swipedLeft && hasMore) {
         // Animate card off to the left. The next card enters after React commits the new index.
         translateX.value = withTiming(
-          -SCREEN_WIDTH,
+          -screenWidth,
           { duration: 150 },
           () => {
             runOnJS(goNext)();
@@ -196,7 +224,7 @@ export default function ResultScreen() {
       } else if (swipedRight && hasPrevious) {
         // Animate card off to the right. The previous card enters after React commits the new index.
         translateX.value = withTiming(
-          SCREEN_WIDTH,
+          screenWidth,
           { duration: 150 },
           () => {
             runOnJS(goPrevious)();
@@ -222,7 +250,7 @@ export default function ResultScreen() {
     transform: [{ translateX: translateX.value }],
     opacity: interpolate(
       Math.abs(translateX.value),
-      [0, SCREEN_WIDTH * 0.6],
+      [0, screenWidth * 0.6],
       [1, 0.4],
     ),
   }));
@@ -263,7 +291,15 @@ export default function ResultScreen() {
   return (
     <>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView
+          style={[
+            styles.safeArea,
+            {
+              paddingHorizontal: cardLayout.horizontalPadding,
+            },
+            cardLayout.compact && styles.safeAreaCompact,
+          ]}
+        >
           <Stack.Toolbar placement="left">
             <Stack.Toolbar.Button onPress={handleGoBack} icon={"xmark"} />
           </Stack.Toolbar>
@@ -271,7 +307,7 @@ export default function ResultScreen() {
           {/* Progress dots + counter */}
           <Animated.View
             entering={FadeIn.duration(400)}
-            style={styles.header}
+            style={[styles.header, cardLayout.compact && styles.headerCompact]}
           >
             <ProgressDots total={restaurants.length} current={currentIndex} />
             <ThemedText
@@ -286,7 +322,11 @@ export default function ResultScreen() {
             <Animated.View style={[styles.cardContainer, cardAnimStyle]}>
               <RestaurantCard
                 key={currentRestaurant.placeId}
+                compact={cardLayout.compact}
+                height={cardLayout.cardHeight}
+                photoHeight={cardLayout.photoHeight}
                 restaurant={currentRestaurant}
+                veryCompact={cardLayout.veryCompact}
               />
             </Animated.View>
           </GestureDetector>
@@ -298,19 +338,12 @@ export default function ResultScreen() {
             ) : (
               <Animated.View
                 entering={FadeIn.duration(400)}
-                style={[
-                  styles.noMoreContainer,
-                  {
-                    backgroundColor: theme.accentSoft,
-                    borderColor: theme.border,
-                  },
-                ]}
+                style={styles.noMoreLabelContainer}
               >
-                <ThemedText style={styles.noMoreEmoji}>🎯</ThemedText>
                 <ThemedText
-                  style={[styles.noMoreText, { color: theme.textSecondary }]}
+                  style={[styles.noMoreLabel, { color: theme.textSecondary }]}
                 >
-                  You've seen all the top picks!
+                  🎯 You've seen all picks
                 </ThemedText>
               </Animated.View>
             )}
@@ -331,8 +364,10 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
     paddingBottom: Spacing.three,
+  },
+  safeAreaCompact: {
+    paddingBottom: Spacing.two,
   },
   // Header
   header: {
@@ -340,6 +375,10 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingTop: 16,
     paddingBottom: 8,
+  },
+  headerCompact: {
+    paddingTop: 8,
+    paddingBottom: 6,
   },
   counterText: {
     fontSize: 13,
@@ -350,29 +389,25 @@ const styles = StyleSheet.create({
   cardContainer: {
     flex: 1,
     justifyContent: "center",
+    minHeight: 0,
+    width: "100%",
   },
   // Bottom
   bottomArea: {
     paddingTop: Spacing.two,
-    minHeight: 48,
+    minHeight: 36,
     alignItems: "center",
     justifyContent: "center",
   },
   // No more
-  noMoreContainer: {
-    width: "100%",
-    padding: Spacing.three,
-    borderRadius: BorderRadius.lg,
+  noMoreLabelContainer: {
     alignItems: "center",
-    gap: 6,
-    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 28,
   },
-  noMoreEmoji: {
-    fontSize: 20,
-  },
-  noMoreText: {
-    fontSize: 14,
-    fontWeight: "500",
+  noMoreLabel: {
+    fontSize: 13,
+    fontWeight: "600",
     textAlign: "center",
   },
   // Empty state

@@ -26,14 +26,24 @@ const REASON_BADGE: Record<PickReason, { emoji: string; label: string }> = {
 /* ------------------------------------------------------------------ */
 
 interface RestaurantCardProps {
+  compact?: boolean;
+  height?: number;
+  photoHeight?: number;
   restaurant: Restaurant;
+  veryCompact?: boolean;
 }
 
 /**
  * Premium restaurant result card.
  * Shows reason badge, photo, name, dynamic explanation, rating, distance, and CTA.
  */
-export function RestaurantCard({ restaurant }: RestaurantCardProps) {
+export function RestaurantCard({
+  compact = false,
+  height,
+  photoHeight,
+  restaurant,
+  veryCompact = false,
+}: RestaurantCardProps) {
   const theme = useTheme();
   const badge = REASON_BADGE[restaurant.reason] || REASON_BADGE.top_pick;
   const photoIdentity = restaurant.photoUrl ?? restaurant.placeId;
@@ -71,20 +81,39 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
     <View
       style={[
         styles.card,
+        compact && styles.cardCompact,
+        veryCompact && styles.cardVeryCompact,
+        height ? { height } : null,
         { backgroundColor: theme.card, shadowColor: theme.text },
       ]}
     >
       {/* Reason Badge */}
-      <View style={[styles.reasonBadge, { backgroundColor: theme.accent }]}>
-        <ThemedText style={styles.reasonEmoji}>{badge.emoji}</ThemedText>
-        <ThemedText style={styles.reasonLabel}>{badge.label}</ThemedText>
-      </View>
+      {/* <View
+        style={[
+          styles.reasonBadge,
+          compact && styles.reasonBadgeCompact,
+          { backgroundColor: theme.accent },
+        ]}
+      >
+        <ThemedText
+          style={[styles.reasonEmoji, compact && styles.reasonEmojiCompact]}
+        >
+          {badge.emoji}
+        </ThemedText>
+        <ThemedText
+          style={[styles.reasonLabel, compact && styles.reasonLabelCompact]}
+          numberOfLines={1}
+        >
+          {badge.label}
+        </ThemedText>
+      </View> */}
 
       {/* Photo */}
       {restaurant.photoUrl ? (
         <View
           style={[
             styles.photoContainer,
+            photoHeight ? { height: photoHeight } : null,
             { backgroundColor: theme.backgroundElement },
           ]}
         >
@@ -102,6 +131,7 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           style={[
             styles.photoContainer,
             styles.photoPlaceholder,
+            photoHeight ? { height: photoHeight } : null,
             { backgroundColor: theme.backgroundElement },
           ]}
         >
@@ -110,25 +140,31 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
       )}
 
       {/* Info Section */}
-      <View style={styles.infoSection}>
+      <View
+        style={[
+          styles.infoSection,
+          compact && styles.infoSectionCompact,
+          veryCompact && styles.infoSectionVeryCompact,
+        ]}
+      >
         {/* Name */}
         <ThemedText
-          style={[styles.name, { color: theme.text }]}
+          style={[
+            styles.name,
+            compact && styles.nameCompact,
+            veryCompact && styles.nameVeryCompact,
+            { color: theme.text },
+          ]}
           numberOfLines={2}
         >
-          {restaurant.name}
+          {restaurant.name.charAt(0).toUpperCase() + restaurant.name.slice(1)}
         </ThemedText>
 
         {/* Dynamic Explanation — smart hint */}
-        <ThemedText
-          style={[styles.explanationText, { color: theme.textSecondary }]}
-        >
-          ✨ {restaurant.explanation}
-        </ThemedText>
 
         {/* Rating + Review Count */}
         <View style={styles.ratingRow}>
-          <StarRating rating={restaurant.rating} size={15} />
+          <StarRating rating={restaurant.rating} size={compact ? 14 : 15} />
           <View
             style={[
               styles.reviewBadge,
@@ -137,6 +173,7 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           >
             <ThemedText
               style={[styles.reviewCount, { color: theme.textSecondary }]}
+              numberOfLines={1}
             >
               {reviewCountLabel}
             </ThemedText>
@@ -151,12 +188,16 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
               { backgroundColor: theme.backgroundElement },
             ]}
           >
-            <ThemedText style={[styles.durationText, { color: theme.text }]}>
+            <ThemedText
+              style={[styles.durationText, { color: theme.text }]}
+              numberOfLines={1}
+            >
               📍 {durationLabel}
             </ThemedText>
           </View>
           <ThemedText
             style={[styles.distanceDetail, { color: theme.textSecondary }]}
+            numberOfLines={1}
           >
             {distanceLabel}
           </ThemedText>
@@ -170,17 +211,38 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           {restaurant.formattedAddress}
         </ThemedText>
       </View>
-
+      <ThemedText
+        style={[
+          styles.explanationText,
+          compact && styles.explanationTextCompact,
+          veryCompact && styles.explanationTextVeryCompact,
+          { color: theme.textSecondary },
+        ]}
+        numberOfLines={2}
+      >
+        ✨ {restaurant.explanation}
+      </ThemedText>
       {/* Go There Button */}
       <Pressable
         onPress={handleGoThere}
         style={({ pressed }) => [
           styles.goButton,
+          compact && styles.goButtonCompact,
+          veryCompact && styles.goButtonVeryCompact,
           { backgroundColor: theme.accent },
           pressed && styles.goButtonPressed,
         ]}
       >
-        <ThemedText style={styles.goButtonText}>Take me there →</ThemedText>
+        <ThemedText
+          style={[
+            styles.goButtonText,
+            compact && styles.goButtonTextCompact,
+            veryCompact && styles.goButtonTextVeryCompact,
+          ]}
+          numberOfLines={1}
+        >
+          Take me there →
+        </ThemedText>
       </Pressable>
     </View>
   );
@@ -201,6 +263,15 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
   },
+  cardCompact: {
+    gap: 12,
+    padding: 14,
+  },
+  cardVeryCompact: {
+    gap: 10,
+    padding: 12,
+    borderRadius: BorderRadius.md,
+  },
   // Reason badge
   reasonBadge: {
     flexDirection: "row",
@@ -211,14 +282,25 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: BorderRadius.full,
   },
+  reasonBadgeCompact: {
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
   reasonEmoji: {
     fontSize: 13,
+  },
+  reasonEmojiCompact: {
+    fontSize: 12,
   },
   reasonLabel: {
     color: "#FFFFFF",
     fontSize: 13,
     fontWeight: "700",
     letterSpacing: 0.2,
+  },
+  reasonLabelCompact: {
+    fontSize: 12,
   },
   // Photo
   photoContainer: {
@@ -240,12 +322,31 @@ const styles = StyleSheet.create({
   },
   // Info
   infoSection: {
+    flex: 1,
     gap: 10,
+    minHeight: 0,
+  },
+  infoSectionCompact: {
+    gap: 7,
+  },
+  infoSectionVeryCompact: {
+    gap: 6,
   },
   name: {
     fontSize: 24,
     fontWeight: "800",
     lineHeight: 30,
+    minHeight: 60,
+  },
+  nameCompact: {
+    fontSize: 22,
+    lineHeight: 27,
+    minHeight: 54,
+  },
+  nameVeryCompact: {
+    fontSize: 21,
+    lineHeight: 26,
+    minHeight: 52,
   },
   // Explanation
   explanationText: {
@@ -253,12 +354,22 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     fontStyle: "italic",
     lineHeight: 18,
+    minHeight: 36,
+  },
+  explanationTextCompact: {
+    fontSize: 12,
+    lineHeight: 16,
+    minHeight: 32,
+  },
+  explanationTextVeryCompact: {
+    minHeight: 30,
   },
   // Rating
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    minHeight: 22,
   },
   reviewBadge: {
     paddingHorizontal: 8,
@@ -274,8 +385,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    minHeight: 28,
   },
   distanceBadge: {
+    flexShrink: 0,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: BorderRadius.sm,
@@ -285,6 +398,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   distanceDetail: {
+    flex: 1,
     fontSize: 13,
     fontWeight: "500",
   },
@@ -305,6 +419,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  goButtonCompact: {
+    height: 48,
+  },
+  goButtonVeryCompact: {
+    height: 46,
+  },
   goButtonPressed: {
     opacity: 0.85,
     transform: [{ scale: 0.98 }],
@@ -314,5 +434,11 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "700",
     letterSpacing: 0.3,
+  },
+  goButtonTextCompact: {
+    fontSize: 16,
+  },
+  goButtonTextVeryCompact: {
+    fontSize: 15,
   },
 });

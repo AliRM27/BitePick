@@ -28,7 +28,7 @@ import type { FoodContext } from "@/types/restaurant";
 const CONTEXT_OPTIONS: { key: FoodContext; emoji: string; label: string }[] = [
   { key: "coffee", emoji: "☕", label: "Coffee" },
   { key: "food", emoji: "🍝", label: "Food" },
-  { key: "quick_bite", emoji: "⚡", label: "Quick bite" },
+  // { key: "quick_bite", emoji: "⚡", label: "Quick bite" },
 ];
 
 const RADIUS_OPTIONS = [
@@ -241,7 +241,7 @@ const radiusStyles = StyleSheet.create({
     minHeight: 40,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
   },
   optionLabel: {
     fontSize: 14,
