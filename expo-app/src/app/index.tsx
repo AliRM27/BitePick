@@ -126,7 +126,7 @@ const ctxStyles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderRadius: BorderRadius.full,
     borderWidth: 1.5,
   },
@@ -211,7 +211,7 @@ function RadiusSelector({
 const radiusStyles = StyleSheet.create({
   container: {
     width: "100%",
-    gap: Spacing.two,
+    gap: 6,
   },
   header: {
     flexDirection: "row",
@@ -220,12 +220,13 @@ const radiusStyles = StyleSheet.create({
     paddingHorizontal: Spacing.one,
   },
   title: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 12,
+    fontWeight: "600",
     textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   value: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "700",
   },
   segmentedControl: {
@@ -238,13 +239,13 @@ const radiusStyles = StyleSheet.create({
   },
   option: {
     flex: 1,
-    minHeight: 40,
+    minHeight: 36,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: BorderRadius.lg,
   },
   optionLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "700",
   },
 });
@@ -260,7 +261,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [context, setContext] = useState<FoodContext>("food");
-  const [radiusMeters, setRadiusMeters] = useState(3000);
+  const [radiusMeters, setRadiusMeters] = useState(1000);
   const subtitle = useRotatingText(SUGGESTIONS);
   const lastLocationRef = useRef<{
     latitude: number;
@@ -335,8 +336,8 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
-        {/* Hero Section */}
-        <View style={styles.heroSection}>
+        {/* ── Top: Identity Zone ── */}
+        <View style={styles.identityZone}>
           <Animated.View entering={FadeInDown.duration(600).delay(400)}>
             <ThemedText style={[styles.title, { color: theme.text }]}>
               Where should{"\n"}I eat?
@@ -353,10 +354,10 @@ export default function HomeScreen() {
           </Animated.View>
         </View>
 
-        {/* Bottom Section */}
+        {/* ── Bottom: Interaction Zone ── */}
         <Animated.View
           entering={FadeInUp.duration(600).delay(800)}
-          style={styles.bottomSection}
+          style={styles.interactionZone}
         >
           {/* Error message */}
           {error && (
@@ -374,7 +375,10 @@ export default function HomeScreen() {
           <ContextSelector selected={context} onSelect={setContext} />
 
           {/* Radius Selector */}
-          <RadiusSelector selected={radiusMeters} onSelect={setRadiusMeters} />
+          <RadiusSelector
+            selected={radiusMeters}
+            onSelect={setRadiusMeters}
+          />
 
           {/* Pick Button */}
           <PickButton onPress={handlePick} loading={loading} />
@@ -401,20 +405,16 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    justifyContent: "space-between",
-    paddingBottom: Spacing.five,
   },
-  heroSection: {
-    flex: 1,
+
+  /* ── Top zone: ~38% of screen, title sits at its bottom edge ── */
+  identityZone: {
+    flex: 3.8,
     alignItems: "center",
-    justifyContent: "center",
-    gap: Spacing.three,
+    justifyContent: "flex-end",
     paddingHorizontal: Spacing.four,
-  },
-  heroEmoji: {
-    fontSize: 64,
-    lineHeight: 80,
-    marginBottom: Spacing.two,
+    gap: Spacing.two,
+    paddingBottom: Spacing.four,
   },
   title: {
     fontSize: 42,
@@ -427,14 +427,19 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "500",
     textAlign: "center",
-    marginTop: Spacing.two,
+    marginTop: Spacing.one,
   },
-  bottomSection: {
-    gap: Spacing.three,
+
+  /* ── Bottom zone: ~62% of screen, controls anchor downward ── */
+  interactionZone: {
+    flex: 6.2,
     alignItems: "center",
+    justifyContent: "flex-end",
     paddingHorizontal: Spacing.four,
-    paddingBottom: Spacing.two,
+    paddingBottom: Spacing.five,
+    gap: Spacing.three,
   },
+
   errorContainer: {
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
