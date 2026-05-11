@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -260,7 +260,7 @@ export default function HomeScreen() {
   const { getLocation } = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [context, setContext] = useState<FoodContext>("food");
+  const [context, setContext] = useState<FoodContext>("coffee");
   const [radiusMeters, setRadiusMeters] = useState(1000);
   const subtitle = useRotatingText(SUGGESTIONS);
   const lastLocationRef = useRef<{
@@ -336,6 +336,12 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
+        {/* <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            onPress={() => router.push("/settings")}
+            icon="gearshape"
+          />
+        </Stack.Toolbar> */}
         {/* ── Top: Identity Zone ── */}
         <View style={styles.identityZone}>
           <Animated.View entering={FadeInDown.duration(600).delay(400)}>
@@ -375,10 +381,7 @@ export default function HomeScreen() {
           <ContextSelector selected={context} onSelect={setContext} />
 
           {/* Radius Selector */}
-          <RadiusSelector
-            selected={radiusMeters}
-            onSelect={setRadiusMeters}
-          />
+          <RadiusSelector selected={radiusMeters} onSelect={setRadiusMeters} />
 
           {/* Pick Button */}
           <PickButton onPress={handlePick} loading={loading} />

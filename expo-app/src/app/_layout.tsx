@@ -3,9 +3,9 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import React from "react";
-import { useColorScheme } from "react-native";
+import { Button, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -55,12 +55,32 @@ export default function RootLayout() {
           <AnimatedSplashOverlay />
           <Stack
             screenOptions={{
-              headerShown: false,
-              animation: "slide_from_right",
               contentStyle: { backgroundColor: colors.background },
             }}
           >
-            <Stack.Screen name="index" />
+            <Stack.Screen
+              name="index"
+              options={{
+                headerTransparent: true,
+                headerShadowVisible: false,
+                title: "",
+              }}
+            >
+              <Stack.Toolbar placement="right">
+                <Stack.Toolbar.Button
+                  icon="gearshape"
+                  onPress={() => router.push("/settings")}
+                />
+              </Stack.Toolbar>
+            </Stack.Screen>
+            <Stack.Screen
+              name="settings"
+              options={{
+                headerTransparent: true,
+                headerShadowVisible: false,
+                title: "",
+              }}
+            />
             <Stack.Screen
               name="result"
               options={{
