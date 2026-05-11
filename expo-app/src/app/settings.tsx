@@ -1,6 +1,9 @@
 /**
  * Settings Screen — lightweight, calm, intentional.
  *
+ * Features a collapsing header: the large "Settings" title fades out
+ * as you scroll, and a compact title fades into the header bar.
+ *
  * Sections:
  *   1. Preferences  → Maps provider
  *   2. About        → Privacy, Feedback, Version
@@ -10,19 +13,28 @@
 import { Stack, useRouter } from "expo-router";
 import Constants from "expo-constants";
 import React from "react";
-import { Alert, Linking, ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Alert, Linking, StyleSheet, View } from "react-native";
 import * as Haptics from "expo-haptics";
+import Animated, {
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 
 import { SettingsRow } from "@/components/settings-row";
 import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
 import { useSettings, type MapsPreference } from "@/hooks/use-settings";
 import { useTheme } from "@/hooks/use-theme";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 /* ------------------------------------------------------------------ */
-/*  Maps options                                                       */
+/*  Constants                                                          */
 /* ------------------------------------------------------------------ */
+
+/** Scroll distance over which the title transition completes */
+const COLLAPSE_THRESHOLD = 45;
 
 const MAPS_OPTIONS: { key: MapsPreference; label: string; icon: string }[] = [
   { key: "apple", label: "Apple Maps", icon: "🗺️" },
@@ -44,6 +56,60 @@ export default function SettingsScreen() {
     Constants.manifest2?.extra?.expoClient?.version ??
     "1.0.0";
 
+  /* ── Scroll tracking ── */
+
+  const scrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  /* ── Animated styles ── */
+
+  // Large inline title: fades out + slides up
+  const largeTitleStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [0, COLLAPSE_THRESHOLD],
+      [1, 0],
+      "clamp",
+    ),
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, COLLAPSE_THRESHOLD],
+          [0, -8],
+          "clamp",
+        ),
+      },
+    ],
+  }));
+
+  // Small header title: fades in
+  const headerTitleStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [COLLAPSE_THRESHOLD * 0.6, COLLAPSE_THRESHOLD],
+      [0, 1],
+      "clamp",
+    ),
+  }));
+
+  // Subtle header border: appears when scrolled
+  const headerBorderStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [COLLAPSE_THRESHOLD * 0.5, COLLAPSE_THRESHOLD],
+      [0, 1],
+      "clamp",
+    ),
+  }));
+
+  /* ── Handlers ── */
+
   const handleGoBack = () => {
     router.back();
   };
@@ -63,20 +129,48 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      {/* <SafeAreaView style={styles.safeArea}> */}
+      {/* ── Fixed header overlay ── */}
       <Stack.Toolbar placement="left">
         <Stack.Toolbar.Button onPress={handleGoBack} icon="chevron.left" />
       </Stack.Toolbar>
 
-      <ScrollView
+      <Stack.Screen
+        options={{
+          headerTitle: () => (
+            <Animated.View style={headerTitleStyle}>
+              <ThemedText style={[styles.headerTitle, { color: theme.text }]}>
+                Settings
+              </ThemedText>
+            </Animated.View>
+          ),
+        }}
+      />
+
+      {/* Header bottom border */}
+      <Animated.View
+        style={[
+          styles.headerBorder,
+          { backgroundColor: theme.border },
+          headerBorderStyle,
+        ]}
+      />
+
+      {/* ── Scrollable content ── */}
+      <Animated.ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
       >
-        {/* ── Screen title ── */}
-        <ThemedText style={[styles.screenTitle, { color: theme.text }]}>
-          Settings
-        </ThemedText>
+        {/* ── Large title (collapses on scroll) ── */}
+        <Animated.View style={largeTitleStyle}>
+          <ThemedText style={[styles.screenTitle, { color: theme.text }]}>
+            Settings
+          </ThemedText>
+        </Animated.View>
 
         {/* ── Section 1: Preferences ── */}
         <View style={styles.section}>
@@ -146,7 +240,8 @@ export default function SettingsScreen() {
             Made for indecisive food lovers 🍜
           </ThemedText>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
+      {/* </SafeAreaView> */}
     </View>
   );
 }
@@ -170,7 +265,22 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.six,
   },
 
-  /* Title */
+  /* Header */
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    letterSpacing: -0.2,
+  },
+  headerBorder: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: StyleSheet.hairlineWidth,
+    zIndex: 10,
+  },
+
+  /* Large title */
   screenTitle: {
     fontSize: 34,
     fontWeight: "800",
