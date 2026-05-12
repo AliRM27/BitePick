@@ -13,7 +13,8 @@
 import { Stack, useRouter } from "expo-router";
 import Constants from "expo-constants";
 import React from "react";
-import { Alert, Linking, StyleSheet, View } from "react-native";
+import { Alert, Linking, Platform, StyleSheet, View } from "react-native";
+import { useHeaderHeight } from "@react-navigation/elements";
 import * as Haptics from "expo-haptics";
 import Animated, {
   interpolate,
@@ -57,6 +58,8 @@ export default function SettingsScreen() {
     "1.0.0";
 
   /* ── Scroll tracking ── */
+
+  const headerHeight = useHeaderHeight();
 
   const scrollY = useSharedValue(0);
 
@@ -130,6 +133,11 @@ export default function SettingsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* <SafeAreaView style={styles.safeArea}> */}
+      {Platform.OS === "ios" && (
+        <Stack.Toolbar placement="left">
+          <Stack.Toolbar.Button icon={"chevron.left"} onPress={handleGoBack} />
+        </Stack.Toolbar>
+      )}
       {/* ── Fixed header overlay ── */}
       <Stack.Screen
         options={{
@@ -155,7 +163,10 @@ export default function SettingsScreen() {
       {/* ── Scrollable content ── */}
       <Animated.ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          Platform.OS === "android" && { paddingTop: headerHeight },
+        ]}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
         onScroll={scrollHandler}

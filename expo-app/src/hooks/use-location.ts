@@ -51,10 +51,33 @@ export function useLocation() {
         return null;
       }
 
-      // Get current position with balanced accuracy for speed
-      const location = await Location.getCurrentPositionAsync({
+      // Try last known position first (instant, avoids GPS wait)
+      const lastKnown = await Location.getLastKnownPositionAsync();
+      if (lastKnown && Date.now() - lastKnown.timestamp < 5 * 60 * 1000) {
+        // Use cached position if less than 5 minutes old
+        const { latitude, longitude } = lastKnown.coords;
+
+        setState((prev) => ({
+          ...prev,
+          latitude,
+          longitude,
+          loading: false,
+          error: null,
+        }));
+
+        return { latitude, longitude };
+      }
+
+      // Fall back to fresh position with a timeout to avoid hanging
+      const locationPromise = Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Location request timed out. Please try again.')), 15000),
+      );
+
+      const location = await Promise.race([locationPromise, timeoutPromise]);
 
       const { latitude, longitude } = location.coords;
 

@@ -71,7 +71,6 @@ export default function RootLayout() {
               options={{
                 headerTransparent: true,
                 headerShadowVisible: false,
-                title: "",
               }}
             />
             <Stack.Screen

@@ -298,6 +298,7 @@ export default function HomeScreen() {
       // 1. Get location
       const coords = await getLocation();
       if (!coords) {
+        setError("Couldn't get your location. Please check permissions and try again.");
         setLoading(false);
         return;
       }
@@ -349,7 +350,6 @@ export default function HomeScreen() {
             <Stack.Toolbar.Button
               icon="gearshape"
               onPress={() => router.push("/settings")}
-              tintColor={theme.textSecondary}
             />
           </Stack.Toolbar>
         ) : (

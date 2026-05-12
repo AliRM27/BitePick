@@ -1,6 +1,13 @@
 import React, { useCallback } from "react";
 import { Image } from "expo-image";
-import { ActionSheetIOS, Linking, Platform, Pressable, StyleSheet, View } from "react-native";
+import {
+  ActionSheetIOS,
+  Linking,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import * as Haptics from "expo-haptics";
 
 import { StarRating } from "@/components/star-rating";
