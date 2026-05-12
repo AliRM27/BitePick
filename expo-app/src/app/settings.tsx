@@ -131,10 +131,6 @@ export default function SettingsScreen() {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* <SafeAreaView style={styles.safeArea}> */}
       {/* ── Fixed header overlay ── */}
-      <Stack.Toolbar placement="left">
-        <Stack.Toolbar.Button onPress={handleGoBack} icon="chevron.left" />
-      </Stack.Toolbar>
-
       <Stack.Screen
         options={{
           headerTitle: () => (

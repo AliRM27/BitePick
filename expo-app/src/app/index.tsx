@@ -1,6 +1,13 @@
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import {
+  Button,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import Animated, {
@@ -12,6 +19,7 @@ import Animated, {
   FadeInDown,
   FadeInUp,
 } from "react-native-reanimated";
+import { Ionicons } from "@expo/vector-icons";
 
 import { PickButton } from "@/components/pick-button";
 import { ThemedText } from "@/components/themed-text";
@@ -336,12 +344,33 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
-        {/* <Stack.Toolbar placement="right">
-          <Stack.Toolbar.Button
-            onPress={() => router.push("/settings")}
-            icon="gearshape"
+        {Platform.OS === "ios" ? (
+          <Stack.Toolbar placement="right">
+            <Stack.Toolbar.Button
+              icon="gearshape"
+              onPress={() => router.push("/settings")}
+              tintColor={theme.textSecondary}
+            />
+          </Stack.Toolbar>
+        ) : (
+          <Stack.Screen
+            options={{
+              headerRight: () => (
+                <TouchableOpacity
+                  activeOpacity={0.6}
+                  onPress={() => router.push("/settings")}
+                >
+                  <Ionicons
+                    name="settings-outline"
+                    size={26}
+                    color={theme.textSecondary}
+                  />
+                </TouchableOpacity>
+              ),
+            }}
           />
-        </Stack.Toolbar> */}
+        )}
+
         {/* ── Top: Identity Zone ── */}
         <View style={styles.identityZone}>
           <Animated.View entering={FadeInDown.duration(600).delay(400)}>

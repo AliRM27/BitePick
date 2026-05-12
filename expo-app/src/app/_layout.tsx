@@ -65,14 +65,7 @@ export default function RootLayout() {
                 headerShadowVisible: false,
                 title: "",
               }}
-            >
-              <Stack.Toolbar placement="right">
-                <Stack.Toolbar.Button
-                  icon="gearshape"
-                  onPress={() => router.push("/settings")}
-                />
-              </Stack.Toolbar>
-            </Stack.Screen>
+            />
             <Stack.Screen
               name="settings"
               options={{

@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Image } from "expo-image";
-import { Linking, Pressable, StyleSheet, View } from "react-native";
+import { ActionSheetIOS, Linking, Platform, Pressable, StyleSheet, View } from "react-native";
 import * as Haptics from "expo-haptics";
 
 import { StarRating } from "@/components/star-rating";
 import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Spacing } from "@/constants/theme";
+import { useSettings, type MapsPreference } from "@/hooks/use-settings";
 import { useTheme } from "@/hooks/use-theme";
 import type { PickReason, Restaurant } from "@/types/restaurant";
 
@@ -20,6 +21,35 @@ const REASON_BADGE: Record<PickReason, { emoji: string; label: string }> = {
   closest: { emoji: "📍", label: "Closest" },
   hidden_gem: { emoji: "💎", label: "Hidden Gem" },
 };
+
+/* ------------------------------------------------------------------ */
+/*  Maps helpers                                                       */
+/* ------------------------------------------------------------------ */
+
+function buildMapsUrl(
+  provider: "apple" | "google",
+  name: string,
+  lat: number,
+  lng: number,
+): string {
+  const encodedName = encodeURIComponent(name);
+  const ll = `${lat},${lng}`;
+
+  if (provider === "google") {
+    return `https://www.google.com/maps/search/?api=1&query=${encodedName}&query_place_id=&center=${ll}`;
+  }
+  // Apple Maps
+  return `http://maps.apple.com/?q=${encodedName}&near=${ll}`;
+}
+
+function openInMaps(
+  provider: "apple" | "google",
+  name: string,
+  lat: number,
+  lng: number,
+) {
+  Linking.openURL(buildMapsUrl(provider, name, lat, lng));
+}
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
@@ -45,22 +75,43 @@ export function RestaurantCard({
   veryCompact = false,
 }: RestaurantCardProps) {
   const theme = useTheme();
+  const { mapsPreference } = useSettings();
   const badge = REASON_BADGE[restaurant.reason] || REASON_BADGE.top_pick;
   const photoIdentity = restaurant.photoUrl ?? restaurant.placeId;
 
-  const handleGoThere = () => {
+  const handleGoThere = useCallback(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    // Use the restaurant name as a search query near its coordinates.
-    // This opens the actual place listing (photos, reviews, hours)
-    // instead of just a pin on raw coordinates.
-    const name = encodeURIComponent(restaurant.name);
-    const ll = `${restaurant.lat},${restaurant.lng}`;
+    const { name, lat, lng } = restaurant;
 
-    const url = `http://maps.apple.com/?q=${name}&near=${ll}`;
+    if (mapsPreference === "apple") {
+      openInMaps("apple", name, lat, lng);
+      return;
+    }
 
-    Linking.openURL(url);
-  };
+    if (mapsPreference === "google") {
+      openInMaps("google", name, lat, lng);
+      return;
+    }
+
+    // "ask" — show native action sheet (iOS) or fall back to Apple Maps (Android)
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ["Apple Maps", "Google Maps", "Cancel"],
+          cancelButtonIndex: 2,
+          title: "Open with",
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 0) openInMaps("apple", name, lat, lng);
+          if (buttonIndex === 1) openInMaps("google", name, lat, lng);
+        },
+      );
+    } else {
+      // Android: default to Google Maps
+      openInMaps("google", name, lat, lng);
+    }
+  }, [restaurant, mapsPreference]);
 
   const durationLabel =
     restaurant.durationMinutes <= 1
