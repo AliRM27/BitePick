@@ -1,0 +1,48 @@
+{
+  "home": {
+    "title": "我该\n去哪吃？",
+    "tagline_0": "想尝试新口味？ 🌮",
+    "tagline_1": "饿了？让我们来决定。 🍜",
+    "tagline_2": "告别无休止的滑动。 🍕",
+    "tagline_3": "一键选择，马上出发。 🍔",
+    "tagline_4": "相信算法推荐。 🍣",
+    "context_coffee": "咖啡",
+    "context_food": "美食",
+    "radius_label": "搜索半径",
+    "compare_coming_soon": "手动对比 → 敬请期待",
+    "error_no_options": "附近没有找到合适的选项。请尝试扩大范围或更换地点。",
+    "error_generic": "出现错误，请重试。",
+    "error_location_denied": "无法获取位置信息，请检查权限后重试。"
+  },
+  "result": {
+    "swipe_hint": "← 滑动查看更多选择 →",
+    "no_restaurants": "未找到餐厅",
+    "try_again": "换个地点再试一次",
+    "go_back": "返回",
+    "of": "/",
+    "seen_all": "您已看完所有推荐 🎯"
+  },
+  "settings": {
+    "title": "设置",
+    "preferences": "偏好设置",
+    "apple_maps": "苹果地图",
+    "google_maps": "谷歌地图",
+    "ask_every_time": "每次询问",
+    "maps_footer": "选择您偏好的导航地图应用。",
+    "about": "关于",
+    "privacy_policy": "隐私政策",
+    "coming_soon": "敬请期待。",
+    "ok": "确定",
+    "send_feedback": "发送反馈",
+    "app_version": "应用版本",
+    "footer": "为有选择困难的吃货打造 🍜"
+  },
+  "components": {
+    "pick_button": "帮我选",
+    "take_me_there": "带我去这 →",
+    "min_away": "分钟路程",
+    "walking": "步行",
+    "driving": "驾车",
+    "reviews": "条评价"
+  }
+}

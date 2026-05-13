@@ -1,0 +1,48 @@
+{
+  "home": {
+    "title": "Where should\nI eat?",
+    "tagline_0": "Craving something new? 🌮",
+    "tagline_1": "Hungry? Let us decide. 🍜",
+    "tagline_2": "Skip the endless scrolling. 🍕",
+    "tagline_3": "One tap. One pick. Let us go. 🍔",
+    "tagline_4": "Trust the algorithm. 🍣",
+    "context_coffee": "Coffee",
+    "context_food": "Food",
+    "radius_label": "Radius",
+    "compare_coming_soon": "Compare manually → coming soon",
+    "error_no_options": "No great options found nearby. Try a larger radius, different category, or location.",
+    "error_generic": "Something went wrong. Please try again.",
+    "error_location_denied": "Couldn't get your location. Please check permissions and try again."
+  },
+  "result": {
+    "swipe_hint": "← Swipe for more picks →",
+    "no_restaurants": "No restaurants found",
+    "try_again": "Try again from a different location",
+    "go_back": "Go back",
+    "of": "of",
+    "seen_all": "You've seen all picks 🎯"
+  },
+  "settings": {
+    "title": "Settings",
+    "preferences": "PREFERENCES",
+    "apple_maps": "Apple Maps",
+    "google_maps": "Google Maps",
+    "ask_every_time": "Ask Every Time",
+    "maps_footer": "Choose your preferred maps app for navigation.",
+    "about": "ABOUT",
+    "privacy_policy": "Privacy Policy",
+    "coming_soon": "Coming soon.",
+    "ok": "OK",
+    "send_feedback": "Send Feedback",
+    "app_version": "App Version",
+    "footer": "Made for indecisive food lovers 🍜"
+  },
+  "components": {
+    "pick_button": "Pick for me",
+    "take_me_there": "Take me there →",
+    "min_away": "min away",
+    "walking": "Walking",
+    "driving": "Driving",
+    "reviews": "reviews"
+  }
+}

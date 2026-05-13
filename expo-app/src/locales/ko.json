@@ -1,0 +1,48 @@
+{
+  "home": {
+    "title": "어디서\n먹을까?",
+    "tagline_0": "새로운 음식이 땡기나요? 🌮",
+    "tagline_1": "배고프신가요? 저희가 정해드릴게요. 🍜",
+    "tagline_2": "끝없는 스크롤은 이제 그만. 🍕",
+    "tagline_3": "터치 한 번으로 결정 끝. 출발! 🍔",
+    "tagline_4": "알고리즘을 믿으세요. 🍣",
+    "context_coffee": "카페",
+    "context_food": "식사",
+    "radius_label": "반경",
+    "compare_coming_soon": "직접 비교하기 → 출시 예정",
+    "error_no_options": "근처에 좋은 선택지가 없습니다. 반경을 넓히거나 위치를 변경해보세요.",
+    "error_generic": "문제가 발생했습니다. 다시 시도해주세요.",
+    "error_location_denied": "위치를 가져올 수 없습니다. 권한을 확인해주세요."
+  },
+  "result": {
+    "swipe_hint": "← 스와이프하여 더 보기 →",
+    "no_restaurants": "레스토랑을 찾을 수 없습니다",
+    "try_again": "다른 위치에서 다시 시도",
+    "go_back": "뒤로 가기",
+    "of": "/",
+    "seen_all": "모든 추천을 확인했습니다 🎯"
+  },
+  "settings": {
+    "title": "설정",
+    "preferences": "환경설정",
+    "apple_maps": "Apple 지도",
+    "google_maps": "Google 지도",
+    "ask_every_time": "매번 묻기",
+    "maps_footer": "내비게이션에 사용할 지도 앱을 선택하세요.",
+    "about": "정보",
+    "privacy_policy": "개인정보 처리방침",
+    "coming_soon": "곧 지원 예정입니다.",
+    "ok": "확인",
+    "send_feedback": "피드백 보내기",
+    "app_version": "앱 버전",
+    "footer": "결정장애 미식가들을 위해 만들어졌습니다 🍜"
+  },
+  "components": {
+    "pick_button": "나 대신 골라줘",
+    "take_me_there": "여기로 갈래 →",
+    "min_away": "분 거리",
+    "walking": "도보",
+    "driving": "자동차",
+    "reviews": "개의 리뷰"
+  }
+}

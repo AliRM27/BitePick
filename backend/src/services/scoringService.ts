@@ -5,11 +5,11 @@ import { PlaceResult, getPhotoUrl } from "./placesService";
 /* ------------------------------------------------------------------ */
 
 export type PickReason =
-  | "top_pick"       // Best overall score
-  | "best_rated"     // Highest confidence-weighted rating
-  | "closest"        // Nearest high-quality option
-  | "popular"        // Most reviews + good rating
-  | "hidden_gem";    // High rating, fewer reviews but still solid
+  | "top_pick" // Best overall score
+  | "best_rated" // Highest confidence-weighted rating
+  | "closest" // Nearest high-quality option
+  | "popular" // Most reviews + good rating
+  | "hidden_gem"; // High rating, fewer reviews but still solid
 
 export interface ScoredRestaurant {
   placeId: string;
@@ -42,7 +42,7 @@ function haversineDistance(
   lat1: number,
   lng1: number,
   lat2: number,
-  lng2: number
+  lng2: number,
 ): number {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
 
@@ -92,7 +92,7 @@ function estimateDuration(distanceKm: number): number {
  *   4.6 with 1000 reviews → ~4.59 (almost no pull)
  */
 const CONFIDENCE_THRESHOLD = 50; // reviews needed for ~full trust
-const PRIOR_RATING = 4.0;        // baseline assumption
+const PRIOR_RATING = 4.0; // baseline assumption
 
 function confidenceWeightedRating(rating: number, reviewCount: number): number {
   const v = reviewCount;
@@ -112,14 +112,15 @@ function classifyReason(
   restaurant: PlaceResult,
   distanceKm: number,
   rank: number,
-  maxDistanceKm: number
+  maxDistanceKm: number,
 ): PickReason {
   if (rank === 0) return "top_pick";
 
   const isVeryClose = distanceKm < maxDistanceKm * 0.3;
   const isPopular = restaurant.userRatingCount >= 200;
   const isHighlyRated = restaurant.rating >= 4.5;
-  const isHiddenGem = restaurant.rating >= 4.3 && restaurant.userRatingCount < 100;
+  const isHiddenGem =
+    restaurant.rating >= 4.3 && restaurant.userRatingCount < 100;
 
   if (isHighlyRated && isVeryClose) return "best_rated";
   if (isPopular) return "popular";
@@ -149,7 +150,7 @@ function generateExplanation(
   reviewCount: number,
   distanceKm: number,
   durationMinutes: number,
-  reason: PickReason
+  reason: PickReason,
 ): string {
   const isVeryClose = durationMinutes <= 5;
   const isHighRating = rating >= 4.5;
@@ -181,7 +182,8 @@ function generateExplanation(
   }
 
   if (reason === "popular") {
-    if (isVeryPopular && isVeryClose) return `Popular spot · ${reviewStr} · ${distStr}`;
+    if (isVeryPopular && isVeryClose)
+      return `Popular spot · ${reviewStr} · ${distStr}`;
     if (isVeryPopular) return `Loved by many · ${reviewStr}`;
     return `Popular choice · ${reviewStr}`;
   }
@@ -227,11 +229,11 @@ export function scoreAndRank(
   userLat: number,
   userLng: number,
   maxDistanceKm: number = 5,
-  limit: number = 10
+  limit: number = 10,
 ): ScoredRestaurant[] {
   // Filter by minimum rating and review count to remove low-trust places
   const qualified = restaurants.filter(
-    (r) => r.rating >= MIN_RATING && r.userRatingCount >= MIN_REVIEWS
+    (r) => r.rating >= MIN_RATING && r.userRatingCount >= MIN_REVIEWS,
   );
 
   // Calculate distance, score, and reason for each restaurant
@@ -243,22 +245,22 @@ export function scoreAndRank(
       const distanceFactor = Math.exp(-distanceKm / 1.5);
 
       // Proximity bonus for very close places
-      const proximityBonus =
-        distanceKm < 0.5 ? 0.2 :
-        distanceKm < 1 ? 0.1 :
-        0;
+      const proximityBonus = distanceKm < 0.5 ? 0.2 : distanceKm < 1 ? 0.1 : 0;
 
       // Far distance penalty
       const farPenalty = distanceKm > 3 ? 0.15 : 0;
 
       // Confidence-weighted rating (Bayesian)
-      const adjustedRating = confidenceWeightedRating(r.rating, r.userRatingCount);
+      const adjustedRating = confidenceWeightedRating(
+        r.rating,
+        r.userRatingCount,
+      );
       const ratingFactor = adjustedRating / 5.0;
 
       // Popularity factor: logarithmic scale so diminishing returns
       const popularityFactor = Math.min(
         1,
-        Math.log10(r.userRatingCount + 1) / Math.log10(1001)
+        Math.log10(r.userRatingCount + 1) / Math.log10(1001),
       );
 
       const score =
@@ -306,7 +308,7 @@ export function scoreAndRank(
       r.userRatingCount,
       r.distanceKm,
       r.durationMinutes,
-      reason
+      reason,
     );
     return {
       ...rest,

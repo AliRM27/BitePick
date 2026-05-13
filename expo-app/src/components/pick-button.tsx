@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import React, { useEffect } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import * as Haptics from "expo-haptics";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -10,11 +10,12 @@ import Animated, {
   withTiming,
   withSpring,
   interpolate,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-import { ThemedText } from '@/components/themed-text';
-import { BorderRadius, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { ThemedText } from "@/components/themed-text";
+import { BorderRadius, Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
+import i18n from "@/i18n";
 
 interface PickButtonProps {
   onPress: () => void;
@@ -28,7 +29,11 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  * Large, animated CTA button with pulsing glow effect.
  * The primary interaction point of the app.
  */
-export function PickButton({ onPress, loading = false, disabled = false }: PickButtonProps) {
+export function PickButton({
+  onPress,
+  loading = false,
+  disabled = false,
+}: PickButtonProps) {
   const theme = useTheme();
 
   // Pulsing glow animation
@@ -43,10 +48,10 @@ export function PickButton({ onPress, loading = false, disabled = false }: PickB
     glowPulse.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: 1500, easing: Easing.inOut(Easing.ease) })
+        withTiming(0, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
       ),
       -1,
-      false
+      false,
     );
   }, [glowPulse]);
 
@@ -55,7 +60,7 @@ export function PickButton({ onPress, loading = false, disabled = false }: PickB
       loadingRotation.value = withRepeat(
         withTiming(360, { duration: 1000, easing: Easing.linear }),
         -1,
-        false
+        false,
       );
     } else {
       loadingRotation.value = 0;
@@ -88,11 +93,7 @@ export function PickButton({ onPress, loading = false, disabled = false }: PickB
     <View style={styles.wrapper}>
       {/* Glow layer behind button */}
       <Animated.View
-        style={[
-          styles.glow,
-          { backgroundColor: theme.accentGlow },
-          glowStyle,
-        ]}
+        style={[styles.glow, { backgroundColor: theme.accentGlow }, glowStyle]}
       />
 
       {/* Main button */}
@@ -110,20 +111,16 @@ export function PickButton({ onPress, loading = false, disabled = false }: PickB
       >
         {loading ? (
           <View style={styles.loadingContainer}>
-            <Animated.View style={loadingStyle}>
-              <ThemedText style={[styles.loadingIcon, { color: '#FFFFFF' }]}>
-                ◐
-              </ThemedText>
-            </Animated.View>
-            <ThemedText style={[styles.buttonText, { color: '#FFFFFF' }]}>
+            <ActivityIndicator color="#FFF" />
+            <ThemedText style={[styles.buttonText, { color: "#FFFFFF" }]}>
               Finding your spot...
             </ThemedText>
           </View>
         ) : (
           <View style={styles.contentContainer}>
             <ThemedText style={[styles.emoji]}>🍽️</ThemedText>
-            <ThemedText style={[styles.buttonText, { color: '#FFFFFF' }]}>
-              Pick for me
+            <ThemedText style={[styles.buttonText, { color: "#FFFFFF" }]}>
+              {i18n.t("components.pick_button")}
             </ThemedText>
           </View>
         )}
@@ -134,24 +131,24 @@ export function PickButton({ onPress, loading = false, disabled = false }: PickB
 
 const styles = StyleSheet.create({
   wrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
     paddingHorizontal: Spacing.four,
   },
   glow: {
-    position: 'absolute',
-    width: '100%',
+    position: "absolute",
+    width: "100%",
     height: 72,
     borderRadius: BorderRadius.xl,
   },
   button: {
-    width: '100%',
+    width: "100%",
     height: 64,
     borderRadius: BorderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#FF6B35',
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#FF6B35",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -161,13 +158,13 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   contentContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   emoji: {
@@ -175,7 +172,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   loadingIcon: {

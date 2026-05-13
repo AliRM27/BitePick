@@ -28,6 +28,7 @@ import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
 import { useSettings, type MapsPreference } from "@/hooks/use-settings";
 import { useTheme } from "@/hooks/use-theme";
+import i18n from "@/i18n";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 /* ------------------------------------------------------------------ */
@@ -37,10 +38,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 /** Scroll distance over which the title transition completes */
 const COLLAPSE_THRESHOLD = 45;
 
-const MAPS_OPTIONS: { key: MapsPreference; label: string; icon: string }[] = [
-  { key: "apple", label: "Apple Maps", icon: "🗺️" },
-  { key: "google", label: "Google Maps", icon: "📍" },
-  { key: "ask", label: "Ask Every Time", icon: "🤔" },
+const MAPS_OPTIONS: { key: MapsPreference; label: () => string; icon: string }[] = [
+  { key: "apple", label: () => i18n.t("settings.apple_maps"), icon: "🗺️" },
+  { key: "google", label: () => i18n.t("settings.google_maps"), icon: "📍" },
+  { key: "ask", label: () => i18n.t("settings.ask_every_time"), icon: "🤔" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -123,11 +124,13 @@ export default function SettingsScreen() {
   };
 
   const handlePrivacyPolicy = () => {
-    Alert.alert("Privacy Policy", "Coming soon.", [{ text: "OK" }]);
+    Alert.alert(i18n.t("settings.privacy_policy"), i18n.t("settings.coming_soon"), [{ text: i18n.t("settings.ok") }]);
   };
 
   const handleSendFeedback = () => {
-    Linking.openURL("mailto:feedback@bitepick.app?subject=BitePick Feedback");
+    Linking.openURL(
+      "mailto:lotustudio.app@gmail.com?subject=BitePick Feedback",
+    );
   };
 
   return (
@@ -144,7 +147,7 @@ export default function SettingsScreen() {
           headerTitle: () => (
             <Animated.View style={headerTitleStyle}>
               <ThemedText style={[styles.headerTitle, { color: theme.text }]}>
-                Settings
+                {i18n.t("settings.title")}
               </ThemedText>
             </Animated.View>
           ),
@@ -175,7 +178,7 @@ export default function SettingsScreen() {
         {/* ── Large title (collapses on scroll) ── */}
         <Animated.View style={largeTitleStyle}>
           <ThemedText style={[styles.screenTitle, { color: theme.text }]}>
-            Settings
+            {i18n.t("settings.title")}
           </ThemedText>
         </Animated.View>
 
@@ -184,14 +187,14 @@ export default function SettingsScreen() {
           <ThemedText
             style={[styles.sectionTitle, { color: theme.textSecondary }]}
           >
-            PREFERENCES
+            {i18n.t("settings.preferences")}
           </ThemedText>
 
           <View style={styles.group}>
             {MAPS_OPTIONS.map((opt, i) => (
               <SettingsRow
                 key={opt.key}
-                label={opt.label}
+                label={opt.label()}
                 icon={opt.icon}
                 isSelected={mapsPreference === opt.key}
                 onPress={() => handleMapsSelect(opt.key)}
@@ -204,7 +207,7 @@ export default function SettingsScreen() {
           <ThemedText
             style={[styles.sectionFooter, { color: theme.textSecondary }]}
           >
-            Choose your preferred maps app for navigation.
+            {i18n.t("settings.maps_footer")}
           </ThemedText>
         </View>
 
@@ -213,25 +216,25 @@ export default function SettingsScreen() {
           <ThemedText
             style={[styles.sectionTitle, { color: theme.textSecondary }]}
           >
-            ABOUT
+            {i18n.t("settings.about")}
           </ThemedText>
 
           <View style={styles.group}>
             <SettingsRow
-              label="Privacy Policy"
+              label={i18n.t("settings.privacy_policy")}
               icon="🔒"
               showChevron
               onPress={handlePrivacyPolicy}
               isFirst
             />
             <SettingsRow
-              label="Send Feedback"
+              label={i18n.t("settings.send_feedback")}
               icon="💬"
               showChevron
               onPress={handleSendFeedback}
             />
             <SettingsRow
-              label="App Version"
+              label={i18n.t("settings.app_version")}
               icon="✨"
               value={appVersion}
               isLast
@@ -244,7 +247,7 @@ export default function SettingsScreen() {
           <ThemedText
             style={[styles.footerText, { color: theme.textSecondary }]}
           >
-            Made for indecisive food lovers 🍜
+            {i18n.t("settings.footer")}
           </ThemedText>
         </View>
       </Animated.ScrollView>

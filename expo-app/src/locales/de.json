@@ -1,0 +1,48 @@
+{
+  "home": {
+    "title": "Wo soll ich\nessen?",
+    "tagline_0": "Lust auf etwas Neues? 🌮",
+    "tagline_1": "Hungrig? Lass uns entscheiden. 🍜",
+    "tagline_2": "Überspringe das endlose Scrollen. 🍕",
+    "tagline_3": "Ein Tipp. Eine Wahl. Los geht's. 🍔",
+    "tagline_4": "Vertrau dem Algorithmus. 🍣",
+    "context_coffee": "Kaffee",
+    "context_food": "Essen",
+    "radius_label": "Radius",
+    "compare_coming_soon": "Manuell vergleichen → bald verfügbar",
+    "error_no_options": "Keine guten Optionen in der Nähe gefunden. Größeren Radius versuchen.",
+    "error_generic": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "error_location_denied": "Standort konnte nicht ermittelt werden. Berechtigungen prüfen."
+  },
+  "result": {
+    "swipe_hint": "← Wischen für mehr Auswahl →",
+    "no_restaurants": "Keine Restaurants gefunden",
+    "try_again": "Versuche es von einem anderen Standort erneut",
+    "go_back": "Zurück",
+    "of": "von",
+    "seen_all": "Du hast alle Optionen gesehen 🎯"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "preferences": "EINSTELLUNGEN",
+    "apple_maps": "Apple Karten",
+    "google_maps": "Google Maps",
+    "ask_every_time": "Jedes Mal fragen",
+    "maps_footer": "Wähle deine bevorzugte Karten-App.",
+    "about": "ÜBER",
+    "privacy_policy": "Datenschutzerklärung",
+    "coming_soon": "Kommt bald.",
+    "ok": "OK",
+    "send_feedback": "Feedback senden",
+    "app_version": "App-Version",
+    "footer": "Gemacht für unentschlossene Feinschmecker 🍜"
+  },
+  "components": {
+    "pick_button": "Wähle für mich",
+    "take_me_there": "Bring mich hin →",
+    "min_away": "Min. entfernt",
+    "walking": "Zu Fuß",
+    "driving": "Auto",
+    "reviews": "Bewertungen"
+  }
+}

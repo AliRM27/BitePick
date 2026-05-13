@@ -15,6 +15,7 @@ import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Spacing } from "@/constants/theme";
 import { useSettings, type MapsPreference } from "@/hooks/use-settings";
 import { useTheme } from "@/hooks/use-theme";
+import i18n from "@/i18n";
 import type { PickReason, Restaurant } from "@/types/restaurant";
 
 /* ------------------------------------------------------------------ */
@@ -122,18 +123,18 @@ export function RestaurantCard({
 
   const durationLabel =
     restaurant.durationMinutes <= 1
-      ? "1 min away"
-      : `${restaurant.durationMinutes} min away`;
+      ? `1 ${i18n.t("components.min_away")}`
+      : `${restaurant.durationMinutes} ${i18n.t("components.min_away")}`;
 
   const distanceLabel =
     restaurant.distanceKm < 1
-      ? `${Math.round(restaurant.distanceKm * 1000)}m · Walking`
-      : `${restaurant.distanceKm.toFixed(1)}km · Driving`;
+      ? `${Math.round(restaurant.distanceKm * 1000)}m · ${i18n.t("components.walking")}`
+      : `${restaurant.distanceKm.toFixed(1)}km · ${i18n.t("components.driving")}`;
 
   const reviewCountLabel =
     restaurant.userRatingCount >= 1000
-      ? `${(restaurant.userRatingCount / 1000).toFixed(1)}k reviews`
-      : `${restaurant.userRatingCount} reviews`;
+      ? `${(restaurant.userRatingCount / 1000).toFixed(1)}k ${i18n.t("components.reviews")}`
+      : `${restaurant.userRatingCount} ${i18n.t("components.reviews")}`;
 
   return (
     <View
@@ -299,7 +300,7 @@ export function RestaurantCard({
           ]}
           numberOfLines={1}
         >
-          Take me there →
+          {i18n.t("components.take_me_there")}
         </ThemedText>
       </Pressable>
     </View>

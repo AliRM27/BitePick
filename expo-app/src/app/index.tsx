@@ -24,6 +24,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { PickButton } from "@/components/pick-button";
 import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Spacing } from "@/constants/theme";
+import i18n from "@/i18n";
 import { useLocation } from "@/hooks/use-location";
 import { useTheme } from "@/hooks/use-theme";
 import { pickRestaurant } from "@/services/restaurant";
@@ -33,10 +34,10 @@ import type { FoodContext } from "@/types/restaurant";
 /*  Context options                                                    */
 /* ------------------------------------------------------------------ */
 
-const CONTEXT_OPTIONS: { key: FoodContext; emoji: string; label: string }[] = [
-  { key: "coffee", emoji: "☕", label: "Coffee" },
-  { key: "food", emoji: "🍝", label: "Food" },
-  // { key: "quick_bite", emoji: "⚡", label: "Quick bite" },
+const CONTEXT_OPTIONS: { key: FoodContext; emoji: string; label: () => string }[] = [
+  { key: "coffee", emoji: "☕", label: () => i18n.t("home.context_coffee") },
+  { key: "food", emoji: "🍝", label: () => i18n.t("home.context_food") },
+  // { key: "quick_bite", emoji: "⚡", label: () => i18n.t("home.context_quick_bite") },
 ];
 
 const RADIUS_OPTIONS = [
@@ -51,14 +52,14 @@ const RADIUS_OPTIONS = [
 /* ------------------------------------------------------------------ */
 
 const SUGGESTIONS = [
-  "Craving something new? 🌮",
-  "Hungry? Let us decide. 🍜",
-  "Skip the endless scrolling. 🍕",
-  "One tap. One pick. Let's go. 🍔",
-  "Trust the algorithm. 🍣",
+  () => i18n.t("home.tagline_0"),
+  () => i18n.t("home.tagline_1"),
+  () => i18n.t("home.tagline_2"),
+  () => i18n.t("home.tagline_3"),
+  () => i18n.t("home.tagline_4"),
 ];
 
-function useRotatingText(items: string[], intervalMs = 3000) {
+function useRotatingText(items: (() => string)[], intervalMs = 3000) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -68,7 +69,7 @@ function useRotatingText(items: string[], intervalMs = 3000) {
     return () => clearInterval(timer);
   }, [items.length, intervalMs]);
 
-  return items[index];
+  return items[index]();
 }
 
 /* ------------------------------------------------------------------ */
@@ -113,7 +114,7 @@ function ContextSelector({
                 { color: isActive ? "#FFFFFF" : theme.textSecondary },
               ]}
             >
-              {opt.label}
+              {opt.label()}
             </ThemedText>
           </Pressable>
         );
@@ -169,7 +170,7 @@ function RadiusSelector({
         <ThemedText
           style={[radiusStyles.title, { color: theme.textSecondary }]}
         >
-          Radius
+          {i18n.t("home.radius_label")}
         </ThemedText>
         <ThemedText style={[radiusStyles.value, { color: theme.text }]}>
           {selectedLabel}
@@ -298,7 +299,7 @@ export default function HomeScreen() {
       // 1. Get location
       const coords = await getLocation();
       if (!coords) {
-        setError("Couldn't get your location. Please check permissions and try again.");
+        setError(i18n.t("home.error_location_denied"));
         setLoading(false);
         return;
       }
@@ -314,9 +315,7 @@ export default function HomeScreen() {
       );
 
       if (!result.data.restaurants || result.data.restaurants.length === 0) {
-        setError(
-          "No great options found nearby. Try a larger radius, different category, or location.",
-        );
+        setError(i18n.t("home.error_no_options"));
         setLoading(false);
         return;
       }
@@ -333,9 +332,7 @@ export default function HomeScreen() {
       });
     } catch (err) {
       const message =
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.";
+        err instanceof Error ? err.message : i18n.t("home.error_generic");
       setError(message);
     } finally {
       setLoading(false);
@@ -375,7 +372,7 @@ export default function HomeScreen() {
         <View style={styles.identityZone}>
           <Animated.View entering={FadeInDown.duration(600).delay(400)}>
             <ThemedText style={[styles.title, { color: theme.text }]}>
-              Where should{"\n"}I eat?
+              {i18n.t("home.title")}
             </ThemedText>
           </Animated.View>
 
@@ -419,7 +416,7 @@ export default function HomeScreen() {
           <ThemedText
             style={[styles.compareText, { color: theme.textSecondary }]}
           >
-            Compare manually → coming soon
+            {i18n.t("home.compare_coming_soon")}
           </ThemedText>
         </Animated.View>
       </SafeAreaView>

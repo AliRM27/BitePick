@@ -1,0 +1,48 @@
+{
+  "home": {
+    "title": "Onde devo\ncomer?",
+    "tagline_0": "Desejando algo novo? 🌮",
+    "tagline_1": "Fome? Deixe-nos decidir. 🍜",
+    "tagline_2": "Evite a rolagem infinita. 🍕",
+    "tagline_3": "Um toque. Uma escolha. Vamos. 🍔",
+    "tagline_4": "Confie no algoritmo. 🍣",
+    "context_coffee": "Café",
+    "context_food": "Comida",
+    "radius_label": "Raio",
+    "compare_coming_soon": "Comparar manualmente → em breve",
+    "error_no_options": "Nenhuma boa opção por perto. Tente um raio maior.",
+    "error_generic": "Algo deu errado. Tente novamente.",
+    "error_location_denied": "Não foi possível obter sua localização. Verifique as permissões."
+  },
+  "result": {
+    "swipe_hint": "← Deslize para mais opções →",
+    "no_restaurants": "Nenhum restaurante encontrado",
+    "try_again": "Tente novamente de outro local",
+    "go_back": "Voltar",
+    "of": "de",
+    "seen_all": "Você viu todas as opções 🎯"
+  },
+  "settings": {
+    "title": "Configurações",
+    "preferences": "PREFERÊNCIAS",
+    "apple_maps": "Mapas da Apple",
+    "google_maps": "Google Maps",
+    "ask_every_time": "Perguntar sempre",
+    "maps_footer": "Escolha seu app de mapas preferido.",
+    "about": "SOBRE",
+    "privacy_policy": "Política de Privacidade",
+    "coming_soon": "Em breve.",
+    "ok": "OK",
+    "send_feedback": "Enviar feedback",
+    "app_version": "Versão do App",
+    "footer": "Feito para amantes de comida indecisos 🍜"
+  },
+  "components": {
+    "pick_button": "Escolha para mim",
+    "take_me_there": "Me leve lá →",
+    "min_away": "min",
+    "walking": "A pé",
+    "driving": "De carro",
+    "reviews": "avaliações"
+  }
+}

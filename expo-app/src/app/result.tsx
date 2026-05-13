@@ -18,6 +18,7 @@ import { RestaurantCard } from "@/components/restaurant-card";
 import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
+import i18n from "@/i18n";
 import type { Restaurant } from "@/types/restaurant";
 
 function clamp(value: number, min: number, max: number) {
@@ -75,9 +76,12 @@ function SwipeHint({ visible }: { visible: boolean }) {
   if (!visible) return null;
 
   return (
-    <Animated.View entering={FadeIn.duration(600).delay(800)} style={hintStyles.container}>
+    <Animated.View
+      entering={FadeIn.duration(600).delay(800)}
+      style={hintStyles.container}
+    >
       <ThemedText style={[hintStyles.text, { color: theme.textSecondary }]}>
-        ← Swipe for more picks →
+        {i18n.t("result.swipe_hint")}
       </ThemedText>
     </Animated.View>
   );
@@ -214,22 +218,14 @@ export default function ResultScreen() {
 
       if (swipedLeft && hasMore) {
         // Animate card off to the left. The next card enters after React commits the new index.
-        translateX.value = withTiming(
-          -screenWidth,
-          { duration: 150 },
-          () => {
-            runOnJS(goNext)();
-          },
-        );
+        translateX.value = withTiming(-screenWidth, { duration: 300 }, () => {
+          runOnJS(goNext)();
+        });
       } else if (swipedRight && hasPrevious) {
         // Animate card off to the right. The previous card enters after React commits the new index.
-        translateX.value = withTiming(
-          screenWidth,
-          { duration: 150 },
-          () => {
-            runOnJS(goPrevious)();
-          },
-        );
+        translateX.value = withTiming(screenWidth, { duration: 300 }, () => {
+          runOnJS(goPrevious)();
+        });
       } else {
         // Edge bounce or snap back
         if (
@@ -239,7 +235,7 @@ export default function ResultScreen() {
           runOnJS(edgeBounce)();
         }
         translateX.value = withTiming(0, {
-          duration: 150,
+          duration: 300,
         });
       }
     });
@@ -266,12 +262,12 @@ export default function ResultScreen() {
         <SafeAreaView style={styles.emptyState}>
           <ThemedText style={styles.emptyEmoji}>😕</ThemedText>
           <ThemedText style={[styles.emptyTitle, { color: theme.text }]}>
-            No restaurants found
+            {i18n.t("result.no_restaurants")}
           </ThemedText>
           <ThemedText
             style={[styles.emptySubtitle, { color: theme.textSecondary }]}
           >
-            Try again from a different location
+            {i18n.t("result.try_again")}
           </ThemedText>
           <Pressable
             onPress={handleGoBack}
@@ -281,7 +277,7 @@ export default function ResultScreen() {
               pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
             ]}
           >
-            <ThemedText style={styles.emptyBackButtonText}>Go back</ThemedText>
+            <ThemedText style={styles.emptyBackButtonText}>{i18n.t("result.go_back")}</ThemedText>
           </Pressable>
         </SafeAreaView>
       </View>
@@ -313,7 +309,7 @@ export default function ResultScreen() {
             <ThemedText
               style={[styles.counterText, { color: theme.textSecondary }]}
             >
-              {currentIndex + 1} of {restaurants.length}
+              {currentIndex + 1} {i18n.t("result.of")} {restaurants.length}
             </ThemedText>
           </Animated.View>
 
@@ -343,7 +339,7 @@ export default function ResultScreen() {
                 <ThemedText
                   style={[styles.noMoreLabel, { color: theme.textSecondary }]}
                 >
-                  🎯 You've seen all picks
+                  {i18n.t("result.seen_all")}
                 </ThemedText>
               </Animated.View>
             )}

@@ -1,0 +1,48 @@
+{
+  "home": {
+    "title": "どこで\n食べよう？",
+    "tagline_0": "新しいものが食べたい？ 🌮",
+    "tagline_1": "お腹すいた？私たちにお任せ。 🍜",
+    "tagline_2": "延々とスクロールするのはやめよう。 🍕",
+    "tagline_3": "ワンタップで決定。さあ行こう。 🍔",
+    "tagline_4": "アルゴリズムを信じて。 🍣",
+    "context_coffee": "カフェ",
+    "context_food": "食事",
+    "radius_label": "検索範囲",
+    "compare_coming_soon": "手動で比較 → 近日公開",
+    "error_no_options": "近くに良い選択肢がありません。範囲を広げるか、場所を変えてください。",
+    "error_generic": "エラーが発生しました。もう一度お試しください。",
+    "error_location_denied": "位置情報を取得できません。権限を確認してください。"
+  },
+  "result": {
+    "swipe_hint": "← スワイプして他の候補を見る →",
+    "no_restaurants": "レストランが見つかりません",
+    "try_again": "別の場所からもう一度お試しください",
+    "go_back": "戻る",
+    "of": "/",
+    "seen_all": "すべての候補を見ました 🎯"
+  },
+  "settings": {
+    "title": "設定",
+    "preferences": "設定",
+    "apple_maps": "Apple マップ",
+    "google_maps": "Google マップ",
+    "ask_every_time": "毎回確認する",
+    "maps_footer": "優先するナビゲーションアプリを選択してください。",
+    "about": "アプリについて",
+    "privacy_policy": "プライバシーポリシー",
+    "coming_soon": "近日公開",
+    "ok": "OK",
+    "send_feedback": "フィードバックを送信",
+    "app_version": "アプリのバージョン",
+    "footer": "優柔不断な食いしん坊のために作られました 🍜"
+  },
+  "components": {
+    "pick_button": "代わりに選ぶ",
+    "take_me_there": "ここへ行く →",
+    "min_away": "分",
+    "walking": "徒歩",
+    "driving": "車",
+    "reviews": "件のレビュー"
+  }
+}
