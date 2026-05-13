@@ -32,8 +32,8 @@ const i18n = new I18n({
 const systemLocales = getLocales();
 if (systemLocales && systemLocales.length > 0) {
   // Use the languageCode from the first preferred locale (e.g., 'en', 'es', 'zh')
-  // i18n.locale = systemLocales[0].languageCode ?? "en";
-  i18n.locale = "ru";
+  i18n.locale = systemLocales[0].languageCode ?? "en";
+  // i18n.locale = "en";
 } else {
   i18n.locale = "en";
 }

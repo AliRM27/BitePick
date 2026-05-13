@@ -260,25 +260,30 @@ export default function ResultScreen() {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <SafeAreaView style={styles.emptyState}>
-          <ThemedText style={styles.emptyEmoji}>😕</ThemedText>
-          <ThemedText style={[styles.emptyTitle, { color: theme.text }]}>
-            {i18n.t("result.no_restaurants")}
-          </ThemedText>
-          <ThemedText
-            style={[styles.emptySubtitle, { color: theme.textSecondary }]}
+          <Animated.View
+            entering={FadeIn.duration(500)}
+            style={{ alignItems: "center", gap: Spacing.three }}
           >
-            {i18n.t("result.try_again")}
-          </ThemedText>
-          <Pressable
-            onPress={handleGoBack}
-            style={({ pressed }) => [
-              styles.emptyBackButton,
-              { backgroundColor: theme.accent },
-              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-            ]}
-          >
-            <ThemedText style={styles.emptyBackButtonText}>{i18n.t("result.go_back")}</ThemedText>
-          </Pressable>
+            <ThemedText style={styles.emptyEmoji}>😕</ThemedText>
+            <ThemedText style={[styles.emptyTitle, { color: theme.text }]}>
+              {i18n.t("result.no_restaurants")}
+            </ThemedText>
+            <ThemedText
+              style={[styles.emptySubtitle, { color: theme.textSecondary }]}
+            >
+              {i18n.t("result.try_again")}
+            </ThemedText>
+            <Pressable
+              onPress={handleGoBack}
+              style={({ pressed }) => [
+                styles.emptyBackButton,
+                { backgroundColor: theme.accent },
+                pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+              ]}
+            >
+              <ThemedText style={styles.emptyBackButtonText}>{i18n.t("result.go_back")}</ThemedText>
+            </Pressable>
+          </Animated.View>
         </SafeAreaView>
       </View>
     );
@@ -411,7 +416,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: Spacing.three,
     paddingHorizontal: Spacing.four,
   },
   emptyEmoji: {

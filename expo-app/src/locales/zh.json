@@ -43,6 +43,7 @@
     "min_away": "分钟路程",
     "walking": "步行",
     "driving": "驾车",
-    "reviews": "条评价"
+    "reviews": "条评价",
+    "finding_spot": "正在寻找您的位置..."
   }
 }

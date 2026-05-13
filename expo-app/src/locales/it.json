@@ -43,6 +43,7 @@
     "min_away": "min",
     "walking": "A piedi",
     "driving": "In auto",
-    "reviews": "recensioni"
+    "reviews": "recensioni",
+    "finding_spot": "Cerco il tuo posto..."
   }
 }

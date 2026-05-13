@@ -6,11 +6,10 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
-  withSequence,
   withTiming,
   withSpring,
-  interpolate,
 } from "react-native-reanimated";
+import { Utensils } from "lucide-react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Spacing } from "@/constants/theme";
@@ -36,48 +35,11 @@ export function PickButton({
 }: PickButtonProps) {
   const theme = useTheme();
 
-  // Pulsing glow animation
-  const glowPulse = useSharedValue(0);
   // Press scale animation
   const pressScale = useSharedValue(1);
-  // Loading rotation
-  const loadingRotation = useSharedValue(0);
-
-  useEffect(() => {
-    // Continuous glow pulse
-    glowPulse.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-      ),
-      -1,
-      false,
-    );
-  }, [glowPulse]);
-
-  useEffect(() => {
-    if (loading) {
-      loadingRotation.value = withRepeat(
-        withTiming(360, { duration: 1000, easing: Easing.linear }),
-        -1,
-        false,
-      );
-    } else {
-      loadingRotation.value = 0;
-    }
-  }, [loading, loadingRotation]);
-
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(glowPulse.value, [0, 1], [0.4, 0.9]),
-    transform: [{ scale: interpolate(glowPulse.value, [0, 1], [0.95, 1.08]) }],
-  }));
 
   const buttonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pressScale.value }],
-  }));
-
-  const loadingStyle = useAnimatedStyle(() => ({
-    transform: [{ rotateZ: `${loadingRotation.value}deg` }],
   }));
 
   const handlePressIn = () => {
@@ -91,11 +53,6 @@ export function PickButton({
 
   return (
     <View style={styles.wrapper}>
-      {/* Glow layer behind button */}
-      <Animated.View
-        style={[styles.glow, { backgroundColor: theme.accentGlow }, glowStyle]}
-      />
-
       {/* Main button */}
       <AnimatedPressable
         onPress={onPress}
@@ -113,15 +70,15 @@ export function PickButton({
           <View style={styles.loadingContainer}>
             <ActivityIndicator color="#FFF" />
             <ThemedText style={[styles.buttonText, { color: "#FFFFFF" }]}>
-              Finding your spot...
+              {i18n.t("components.finding_spot")}
             </ThemedText>
           </View>
         ) : (
           <View style={styles.contentContainer}>
-            <ThemedText style={[styles.emoji]}>🍽️</ThemedText>
             <ThemedText style={[styles.buttonText, { color: "#FFFFFF" }]}>
               {i18n.t("components.pick_button")}
             </ThemedText>
+            <Utensils size={24} color="#FFFFFF" />
           </View>
         )}
       </AnimatedPressable>

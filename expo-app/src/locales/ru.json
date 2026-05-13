@@ -43,6 +43,7 @@
     "min_away": "мин",
     "walking": "Пешком",
     "driving": "На авто",
-    "reviews": "отзывов"
+    "reviews": "отзывов",
+    "finding_spot": "Ищем ваше место..."
   }
 }

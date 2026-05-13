@@ -43,6 +43,7 @@
     "min_away": "min away",
     "walking": "Walking",
     "driving": "Driving",
-    "reviews": "reviews"
+    "reviews": "reviews",
+    "finding_spot": "Finding your spot..."
   }
 }

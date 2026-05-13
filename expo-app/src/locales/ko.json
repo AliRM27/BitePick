@@ -43,6 +43,7 @@
     "min_away": "분 거리",
     "walking": "도보",
     "driving": "자동차",
-    "reviews": "개의 리뷰"
+    "reviews": "개의 리뷰",
+    "finding_spot": "장소를 찾는 중..."
   }
 }

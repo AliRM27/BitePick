@@ -19,8 +19,10 @@ import Animated, {
   FadeInDown,
   FadeInUp,
 } from "react-native-reanimated";
+import { Coffee, Utensils } from "lucide-react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+import { ErrorBanner } from "@/components/error-banner";
 import { PickButton } from "@/components/pick-button";
 import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Spacing } from "@/constants/theme";
@@ -34,10 +36,13 @@ import type { FoodContext } from "@/types/restaurant";
 /*  Context options                                                    */
 /* ------------------------------------------------------------------ */
 
-const CONTEXT_OPTIONS: { key: FoodContext; emoji: string; label: () => string }[] = [
-  { key: "coffee", emoji: "☕", label: () => i18n.t("home.context_coffee") },
-  { key: "food", emoji: "🍝", label: () => i18n.t("home.context_food") },
-  // { key: "quick_bite", emoji: "⚡", label: () => i18n.t("home.context_quick_bite") },
+const CONTEXT_OPTIONS: {
+  key: FoodContext;
+  Icon: React.ElementType;
+  label: () => string;
+}[] = [
+  { key: "coffee", Icon: Coffee, label: () => i18n.t("home.context_coffee") },
+  { key: "food", Icon: Utensils, label: () => i18n.t("home.context_food") },
 ];
 
 const RADIUS_OPTIONS = [
@@ -107,7 +112,6 @@ function ContextSelector({
               },
             ]}
           >
-            <ThemedText style={ctxStyles.emoji}>{opt.emoji}</ThemedText>
             <ThemedText
               style={[
                 ctxStyles.label,
@@ -116,6 +120,10 @@ function ContextSelector({
             >
               {opt.label()}
             </ThemedText>
+            <opt.Icon
+              size={18}
+              color={isActive ? "#FFFFFF" : theme.textSecondary}
+            />
           </Pressable>
         );
       })}
@@ -392,16 +400,7 @@ export default function HomeScreen() {
           style={styles.interactionZone}
         >
           {/* Error message */}
-          {error && (
-            <View
-              style={[
-                styles.errorContainer,
-                { backgroundColor: "rgba(239, 68, 68, 0.1)" },
-              ]}
-            >
-              <ThemedText style={styles.errorText}>{error}</ThemedText>
-            </View>
-          )}
+          <ErrorBanner error={error} onDismiss={() => setError(null)} />
 
           {/* Context Selector */}
           <ContextSelector selected={context} onSelect={setContext} />
@@ -469,18 +468,6 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
 
-  errorContainer: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    borderRadius: 12,
-    width: "100%",
-  },
-  errorText: {
-    color: "#EF4444",
-    fontSize: 14,
-    fontWeight: "500",
-    textAlign: "center",
-  },
   compareText: {
     fontSize: 14,
     fontWeight: "500",
