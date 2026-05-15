@@ -12,7 +12,10 @@
     "compare_coming_soon": "Compare manually → coming soon",
     "error_no_options": "No great options found nearby. Try a larger radius, different category, or location.",
     "error_generic": "Something went wrong. Please try again.",
-    "error_location_denied": "Couldn't get your location. Please check permissions and try again."
+    "error_location_denied": "Couldn't get your location. Please check permissions and try again.",
+    "permission_title": "Location Required",
+    "permission_subtitle": "BitePick needs your location to find the best spots around you.",
+    "permission_button": "Open Settings"
   },
   "result": {
     "swipe_hint": "← Swipe for more picks →",

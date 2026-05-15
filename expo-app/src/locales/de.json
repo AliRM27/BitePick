@@ -12,7 +12,10 @@
     "compare_coming_soon": "Manuell vergleichen → bald verfügbar",
     "error_no_options": "Keine guten Optionen in der Nähe gefunden. Größeren Radius versuchen.",
     "error_generic": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
-    "error_location_denied": "Standort konnte nicht ermittelt werden. Berechtigungen prüfen."
+    "error_location_denied": "Standort konnte nicht ermittelt werden. Berechtigungen prüfen.",
+    "permission_title": "Standort Erforderlich",
+    "permission_subtitle": "BitePick benötigt deinen Standort, um die besten Orte in deiner Nähe zu finden.",
+    "permission_button": "Einstellungen Öffnen"
   },
   "result": {
     "swipe_hint": "← Wischen für mehr Auswahl →",

@@ -12,7 +12,10 @@
     "compare_coming_soon": "Comparer manuellement → bientôt",
     "error_no_options": "Aucune bonne option à proximité. Essayez un rayon plus grand ou un autre lieu.",
     "error_generic": "Quelque chose s'est mal passé. Veuillez réessayer.",
-    "error_location_denied": "Impossible d'obtenir votre position. Vérifiez les autorisations."
+    "error_location_denied": "Impossible d'obtenir votre position. Vérifiez les autorisations.",
+    "permission_title": "Localisation Requise",
+    "permission_subtitle": "BitePick a besoin de votre position pour trouver les meilleurs endroits autour de vous.",
+    "permission_button": "Ouvrir les Réglages"
   },
   "result": {
     "swipe_hint": "← Glissez pour plus de choix →",

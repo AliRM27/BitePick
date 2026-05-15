@@ -12,7 +12,10 @@
     "compare_coming_soon": "手动对比 → 敬请期待",
     "error_no_options": "附近没有找到合适的选项。请尝试扩大范围或更换地点。",
     "error_generic": "出现错误，请重试。",
-    "error_location_denied": "无法获取位置信息，请检查权限后重试。"
+    "error_location_denied": "无法获取位置信息，请检查权限后重试。",
+    "permission_title": "需要位置",
+    "permission_subtitle": "BitePick 需要您的位置来寻找周围最好的去处。",
+    "permission_button": "打开设置"
   },
   "result": {
     "swipe_hint": "← 滑动查看更多选择 →",

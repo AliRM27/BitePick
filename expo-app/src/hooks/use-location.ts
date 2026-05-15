@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AppState, AppStateStatus } from 'react-native';
 import * as Location from 'expo-location';
 
 interface LocationState {
@@ -22,13 +23,26 @@ export function useLocation() {
     permissionStatus: null,
   });
 
-  // Check existing permission on mount (don't request yet)
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.getForegroundPermissionsAsync();
-      setState((prev) => ({ ...prev, permissionStatus: status }));
-    })();
+  // Function to refresh permission status
+  const refreshPermissionStatus = useCallback(async () => {
+    const { status } = await Location.getForegroundPermissionsAsync();
+    setState((prev) => ({ ...prev, permissionStatus: status }));
   }, []);
+
+  // Check existing permission on mount and when app comes to foreground
+  useEffect(() => {
+    refreshPermissionStatus();
+
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        refreshPermissionStatus();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [refreshPermissionStatus]);
 
   /**
    * Request location permission and get the current position.

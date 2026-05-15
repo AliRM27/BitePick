@@ -23,6 +23,7 @@ import { Coffee, Utensils, UtensilsCrossed } from "lucide-react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { ErrorBanner } from "@/components/error-banner";
+import { LocationPermissionView } from "@/components/location-permission-view";
 import { PickButton } from "@/components/pick-button";
 import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Spacing } from "@/constants/theme";
@@ -274,7 +275,7 @@ const radiusStyles = StyleSheet.create({
 export default function HomeScreen() {
   const router = useRouter();
   const theme = useTheme();
-  const { getLocation } = useLocation();
+  const { getLocation, permissionStatus } = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [context, setContext] = useState<FoodContext>("coffee");
@@ -399,24 +400,30 @@ export default function HomeScreen() {
           entering={FadeInUp.duration(600).delay(800)}
           style={styles.interactionZone}
         >
-          {/* Error message */}
-          <ErrorBanner error={error} onDismiss={() => setError(null)} />
+          {permissionStatus === "denied" ? (
+            <LocationPermissionView />
+          ) : (
+            <>
+              {/* Error message */}
+              <ErrorBanner error={error} onDismiss={() => setError(null)} />
 
-          {/* Context Selector */}
-          <ContextSelector selected={context} onSelect={setContext} />
+              {/* Context Selector */}
+              <ContextSelector selected={context} onSelect={setContext} />
 
-          {/* Radius Selector */}
-          <RadiusSelector selected={radiusMeters} onSelect={setRadiusMeters} />
+              {/* Radius Selector */}
+              <RadiusSelector selected={radiusMeters} onSelect={setRadiusMeters} />
 
-          {/* Pick Button */}
-          <PickButton onPress={handlePick} loading={loading} />
+              {/* Pick Button */}
+              <PickButton onPress={handlePick} loading={loading} />
 
-          {/* Compare placeholder */}
-          <ThemedText
-            style={[styles.compareText, { color: theme.textSecondary }]}
-          >
-            {i18n.t("home.compare_coming_soon")}
-          </ThemedText>
+              {/* Compare placeholder */}
+              <ThemedText
+                style={[styles.compareText, { color: theme.textSecondary }]}
+              >
+                {i18n.t("home.compare_coming_soon")}
+              </ThemedText>
+            </>
+          )}
         </Animated.View>
       </SafeAreaView>
     </View>
