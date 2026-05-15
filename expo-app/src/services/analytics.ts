@@ -1,4 +1,7 @@
-import analytics from "@react-native-firebase/analytics";
+import {
+  getAnalytics,
+  logEvent as firebaseLogEvent,
+} from "@react-native-firebase/analytics";
 import type { Restaurant } from "@/types/restaurant";
 
 /**
@@ -13,11 +16,8 @@ const logEvent = async (eventName: string, params?: Record<string, any>) => {
   // }
 
   try {
-    if (eventName === "app_open") {
-      await analytics().logAppOpen();
-    } else {
-      await analytics().logEvent(eventName, params);
-    }
+    const analyticsInstance = getAnalytics();
+    await firebaseLogEvent(analyticsInstance, eventName, params || {});
   } catch (err) {
     console.warn("[Analytics Error]", err);
   }

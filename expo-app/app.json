@@ -8,7 +8,7 @@
     "scheme": "bitepick",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/bitePickerIcon.icon",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "BitePick needs your location to find nearby restaurants.",
         "ITSAppUsesNonExemptEncryption": false
