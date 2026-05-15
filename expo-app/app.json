@@ -63,7 +63,8 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "./withFirebasePods.js"
     ],
     "experiments": {
       "typedRoutes": true,

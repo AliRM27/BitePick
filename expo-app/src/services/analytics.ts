@@ -1,25 +1,25 @@
-import analytics from '@react-native-firebase/analytics';
-import type { Restaurant } from '@/types/restaurant';
+import analytics from "@react-native-firebase/analytics";
+import type { Restaurant } from "@/types/restaurant";
 
 /**
  * Centralized logging function that handles errors and console logs in dev mode.
  */
 const logEvent = async (eventName: string, params?: Record<string, any>) => {
-  if (__DEV__) {
-    console.log(
-      `[Analytics] 📊 ${eventName}`,
-      params ? JSON.stringify(params, null, 2) : '',
-    );
-  }
+  // if (__DEV__) {
+  //   console.log(
+  //     `[Analytics] 📊 ${eventName}`,
+  //     params ? JSON.stringify(params, null, 2) : '',
+  //   );
+  // }
 
   try {
-    if (eventName === 'app_open') {
+    if (eventName === "app_open") {
       await analytics().logAppOpen();
     } else {
       await analytics().logEvent(eventName, params);
     }
   } catch (err) {
-    console.warn('[Analytics Error]', err);
+    console.warn("[Analytics Error]", err);
   }
 };
 
@@ -27,14 +27,14 @@ const logEvent = async (eventName: string, params?: Record<string, any>) => {
  * Track when the app is launched.
  */
 export const trackAppOpen = () => {
-  logEvent('app_open');
+  logEvent("app_open");
 };
 
 /**
  * Track when the user starts a search (presses "Pick for me").
  */
 export const trackPickStarted = (category: string, radiusMeters: number) => {
-  logEvent('pick_started', {
+  logEvent("pick_started", {
     category,
     radius_km: radiusMeters / 1000,
   });
@@ -49,7 +49,7 @@ export const trackResultsGenerated = (
   topScore: number | undefined,
   durationMs: number,
 ) => {
-  logEvent('results_generated', {
+  logEvent("results_generated", {
     count,
     top_score: topScore ?? 0,
     duration_ms: durationMs,
@@ -60,8 +60,11 @@ export const trackResultsGenerated = (
  * Track user swipe behavior through recommendations.
  * Helps understand how many picks users browse before deciding.
  */
-export const trackSwipe = (direction: 'left' | 'right', currentIndex: number) => {
-  logEvent('swipe_restaurant', {
+export const trackSwipe = (
+  direction: "left" | "right",
+  currentIndex: number,
+) => {
+  logEvent("swipe_restaurant", {
     direction,
     current_index: currentIndex,
   });
@@ -72,11 +75,11 @@ export const trackSwipe = (direction: 'left' | 'right', currentIndex: number) =>
  * Represents trust in the recommendation.
  */
 export const trackTakeMeThere = (
-  restaurant: Pick<Restaurant, 'name' | 'placeId' | 'rating' | 'distanceKm'>,
+  restaurant: Pick<Restaurant, "name" | "placeId" | "rating" | "distanceKm">,
   index: number,
   category: string,
 ) => {
-  logEvent('take_me_there_pressed', {
+  logEvent("take_me_there_pressed", {
     restaurant_name: restaurant.name,
     place_id: restaurant.placeId,
     rating: restaurant.rating,
@@ -90,7 +93,7 @@ export const trackTakeMeThere = (
  * Track when the user has swiped through all available recommendations.
  */
 export const trackEndOfResultsReached = () => {
-  logEvent('end_of_results_reached');
+  logEvent("end_of_results_reached");
 };
 
 /**
@@ -98,9 +101,9 @@ export const trackEndOfResultsReached = () => {
  * Important for onboarding flow analysis.
  */
 export const trackLocationPermissionState = (
-  status: 'granted' | 'denied' | 'undetermined' | string,
+  status: "granted" | "denied" | "undetermined" | string,
 ) => {
-  logEvent('location_permission_state', {
+  logEvent("location_permission_state", {
     status,
   });
 };
