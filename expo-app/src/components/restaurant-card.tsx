@@ -40,15 +40,27 @@ function buildMapsUrl(
   name: string,
   lat: number,
   lng: number,
+  placeId?: string,
+  address?: string,
 ): string {
-  const encodedName = encodeURIComponent(name);
-  const ll = `${lat},${lng}`;
-
   if (provider === "google") {
-    return `https://www.google.com/maps/search/?api=1&query=${encodedName}&query_place_id=&center=${ll}`;
+    // Use placeId for an exact spot match on Google Maps. If unavailable, fallback to name + address.
+    const queryText = placeId ? name : (address ? `${name}, ${address}` : name);
+    const encodedQuery = encodeURIComponent(queryText);
+    let url = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
+    if (placeId) {
+      url += `&query_place_id=${placeId}`;
+    }
+    return url;
   }
+  
   // Apple Maps
-  return `http://maps.apple.com/?q=${encodedName}&near=${ll}`;
+  // Include the address with the name so Apple Maps finds the rich place card 
+  // instead of jumping to a similarly named city.
+  const queryText = address ? `${name}, ${address}` : name;
+  const encodedQuery = encodeURIComponent(queryText);
+  const ll = `${lat},${lng}`;
+  return `http://maps.apple.com/?q=${encodedQuery}&sll=${ll}`;
 }
 
 function openInMaps(
@@ -56,8 +68,10 @@ function openInMaps(
   name: string,
   lat: number,
   lng: number,
+  placeId?: string,
+  address?: string,
 ) {
-  Linking.openURL(buildMapsUrl(provider, name, lat, lng));
+  Linking.openURL(buildMapsUrl(provider, name, lat, lng, placeId, address));
 }
 
 /* ------------------------------------------------------------------ */
@@ -99,15 +113,15 @@ export function RestaurantCard({
       trackTakeMeThere(restaurant, index, category);
     }
 
-    const { name, lat, lng } = restaurant;
+    const { name, lat, lng, placeId, formattedAddress } = restaurant;
 
     if (mapsPreference === "apple") {
-      openInMaps("apple", name, lat, lng);
+      openInMaps("apple", name, lat, lng, placeId, formattedAddress);
       return;
     }
 
     if (mapsPreference === "google") {
-      openInMaps("google", name, lat, lng);
+      openInMaps("google", name, lat, lng, placeId, formattedAddress);
       return;
     }
 
@@ -120,13 +134,13 @@ export function RestaurantCard({
           title: "Open with",
         },
         (buttonIndex) => {
-          if (buttonIndex === 0) openInMaps("apple", name, lat, lng);
-          if (buttonIndex === 1) openInMaps("google", name, lat, lng);
+          if (buttonIndex === 0) openInMaps("apple", name, lat, lng, placeId, formattedAddress);
+          if (buttonIndex === 1) openInMaps("google", name, lat, lng, placeId, formattedAddress);
         },
       );
     } else {
       // Android: default to Google Maps
-      openInMaps("google", name, lat, lng);
+      openInMaps("google", name, lat, lng, placeId, formattedAddress);
     }
   }, [restaurant, mapsPreference]);
 
