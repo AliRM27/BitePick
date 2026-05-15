@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1026241219797",
+    "project_id": "bitepicker-46962",
+    "storage_bucket": "bitepicker-46962.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1026241219797:android:72e3291904159fa7e0665c",
+        "android_client_info": {
+          "package_name": "com.alirm.bitepick"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLVkd8CKbN7NW8fEw66Cnonk1hJtqR444"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

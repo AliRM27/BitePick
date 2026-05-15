@@ -31,6 +31,11 @@ import i18n from "@/i18n";
 import { useLocation } from "@/hooks/use-location";
 import { useTheme } from "@/hooks/use-theme";
 import { pickRestaurant } from "@/services/restaurant";
+import {
+  trackLocationPermissionState,
+  trackPickStarted,
+  trackResultsGenerated,
+} from "@/services/analytics";
 import type { FoodContext } from "@/types/restaurant";
 
 /* ------------------------------------------------------------------ */
@@ -300,9 +305,19 @@ export default function HomeScreen() {
     );
   }, [floatY]);
 
+  // Track permission state changes
+  useEffect(() => {
+    if (permissionStatus !== null) {
+      trackLocationPermissionState(permissionStatus);
+    }
+  }, [permissionStatus]);
+
   const handlePick = useCallback(async () => {
     setLoading(true);
     setError(null);
+    trackPickStarted(context, radiusMeters);
+
+    const startTime = Date.now();
 
     try {
       // 1. Get location
@@ -324,10 +339,15 @@ export default function HomeScreen() {
       );
 
       if (!result.data.restaurants || result.data.restaurants.length === 0) {
+        trackResultsGenerated(0, undefined, Date.now() - startTime);
         setError(i18n.t("home.error_no_options"));
         setLoading(false);
         return;
       }
+
+      const count = result.data.restaurants.length;
+      const topScore = result.data.restaurants[0]?.score;
+      trackResultsGenerated(count, topScore, Date.now() - startTime);
 
       // 3. Navigate to result screen with data
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -337,6 +357,7 @@ export default function HomeScreen() {
           restaurants: JSON.stringify(result.data.restaurants),
           userLat: coords.latitude.toString(),
           userLng: coords.longitude.toString(),
+          category: context,
         },
       });
     } catch (err) {

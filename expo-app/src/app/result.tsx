@@ -19,6 +19,7 @@ import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import i18n from "@/i18n";
+import { trackEndOfResultsReached, trackSwipe } from "@/services/analytics";
 import type { Restaurant } from "@/types/restaurant";
 
 function clamp(value: number, min: number, max: number) {
@@ -115,6 +116,7 @@ export default function ResultScreen() {
     restaurants: string;
     userLat: string;
     userLng: string;
+    category: string;
   }>();
 
   const restaurants: Restaurant[] = useMemo(() => {
@@ -128,12 +130,20 @@ export default function ResultScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showHint, setShowHint] = useState(true);
   const [entryOffset, setEntryOffset] = useState(0);
+  const endOfResultsTracked = React.useRef(false);
 
   const currentRestaurant = restaurants[currentIndex] ?? null;
   const hasMore = currentIndex < restaurants.length - 1;
   const hasPrevious = currentIndex > 0;
   const swipeThreshold = screenWidth * 0.15;
   const cardEntryOffset = screenWidth * 0.4;
+
+  React.useEffect(() => {
+    if (!hasMore && restaurants.length > 0 && !endOfResultsTracked.current) {
+      trackEndOfResultsReached();
+      endOfResultsTracked.current = true;
+    }
+  }, [hasMore, restaurants.length]);
 
   const cardLayout = useMemo(() => {
     const veryCompact = screenHeight < 660;
@@ -217,11 +227,13 @@ export default function ResultScreen() {
       const swipedRight = event.translationX > swipeThreshold;
 
       if (swipedLeft && hasMore) {
+        runOnJS(trackSwipe)("left", currentIndex);
         // Animate card off to the left. The next card enters after React commits the new index.
         translateX.value = withTiming(-screenWidth, { duration: 300 }, () => {
           runOnJS(goNext)();
         });
       } else if (swipedRight && hasPrevious) {
+        runOnJS(trackSwipe)("right", currentIndex);
         // Animate card off to the right. The previous card enters after React commits the new index.
         translateX.value = withTiming(screenWidth, { duration: 300 }, () => {
           runOnJS(goPrevious)();
@@ -328,6 +340,8 @@ export default function ResultScreen() {
                 photoHeight={cardLayout.photoHeight}
                 restaurant={currentRestaurant}
                 veryCompact={cardLayout.veryCompact}
+                index={currentIndex}
+                category={params.category}
               />
             </Animated.View>
           </GestureDetector>

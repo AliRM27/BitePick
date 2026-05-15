@@ -13,7 +13,8 @@
         "NSLocationWhenInUseUsageDescription": "BitePick needs your location to find nearby restaurants.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.alirm.bitepick"
+      "bundleIdentifier": "com.alirm.bitepick",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +30,8 @@
         "android.permission.ACCESS_FINE_LOCATION"
       ],
       "predictiveBackGestureEnabled": false,
-      "package": "com.alirm.bitepick"
+      "package": "com.alirm.bitepick",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -50,6 +52,15 @@
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
+          }
+        }
+      ],
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
           }
         }
       ]

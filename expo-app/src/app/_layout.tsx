@@ -4,13 +4,14 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { router, Stack } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { Colors } from "@/constants/theme";
+import { trackAppOpen } from "@/services/analytics";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,10 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const colors = Colors[isDark ? "dark" : "light"];
+
+  useEffect(() => {
+    trackAppOpen();
+  }, []);
 
   // Customize the navigation themes to match BitePick branding
   const BitePickDark = {

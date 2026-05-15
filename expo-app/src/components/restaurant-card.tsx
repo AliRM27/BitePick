@@ -16,6 +16,7 @@ import { BorderRadius, Spacing } from "@/constants/theme";
 import { useSettings, type MapsPreference } from "@/hooks/use-settings";
 import { useTheme } from "@/hooks/use-theme";
 import i18n from "@/i18n";
+import { trackTakeMeThere } from "@/services/analytics";
 import type { PickReason, Restaurant } from "@/types/restaurant";
 
 /* ------------------------------------------------------------------ */
@@ -69,6 +70,8 @@ interface RestaurantCardProps {
   photoHeight?: number;
   restaurant: Restaurant;
   veryCompact?: boolean;
+  index?: number;
+  category?: string;
 }
 
 /**
@@ -81,6 +84,8 @@ export function RestaurantCard({
   photoHeight,
   restaurant,
   veryCompact = false,
+  index,
+  category,
 }: RestaurantCardProps) {
   const theme = useTheme();
   const { mapsPreference } = useSettings();
@@ -89,6 +94,10 @@ export function RestaurantCard({
 
   const handleGoThere = useCallback(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    if (index !== undefined && category !== undefined) {
+      trackTakeMeThere(restaurant, index, category);
+    }
 
     const { name, lat, lng } = restaurant;
 
@@ -251,7 +260,7 @@ export function RestaurantCard({
               style={[styles.durationText, { color: theme.text }]}
               numberOfLines={1}
             >
-              📍 {durationLabel}
+              {durationLabel}
             </ThemedText>
           </View>
           <ThemedText
