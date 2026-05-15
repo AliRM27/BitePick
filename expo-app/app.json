@@ -64,7 +64,9 @@
           }
         }
       ],
-      "./withFirebasePods.js"
+      "./withFirebasePods.js",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
