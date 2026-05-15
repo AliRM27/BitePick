@@ -19,7 +19,7 @@ import Animated, {
   FadeInDown,
   FadeInUp,
 } from "react-native-reanimated";
-import { Coffee, Utensils } from "lucide-react-native";
+import { Coffee, Utensils, UtensilsCrossed } from "lucide-react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { ErrorBanner } from "@/components/error-banner";

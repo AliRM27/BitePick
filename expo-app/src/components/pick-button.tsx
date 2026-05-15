@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
   withSpring,
 } from "react-native-reanimated";
-import { Utensils } from "lucide-react-native";
+import { UtensilsCrossed } from "lucide-react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Spacing } from "@/constants/theme";
@@ -78,7 +78,7 @@ export function PickButton({
             <ThemedText style={[styles.buttonText, { color: "#FFFFFF" }]}>
               {i18n.t("components.pick_button")}
             </ThemedText>
-            <Utensils size={24} color="#FFFFFF" />
+            {/* <UtensilsCrossed size={30} color="#FFFFFF" /> */}
           </View>
         )}
       </AnimatedPressable>
