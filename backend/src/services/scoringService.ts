@@ -24,6 +24,7 @@ export interface ScoredRestaurant {
   lat: number;
   lng: number;
   priceLevel?: string;
+  openNow?: boolean;
   reason: PickReason;
   explanation: string;
 }
@@ -283,6 +284,7 @@ export function scoreAndRank(
         lat: r.lat,
         lng: r.lng,
         priceLevel: r.priceLevel,
+        openNow: r.openNow,
         // Reason is assigned below after sorting
         reason: "top_pick" as PickReason,
         // Keep raw data for reason classification

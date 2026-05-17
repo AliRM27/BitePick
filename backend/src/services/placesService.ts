@@ -16,6 +16,7 @@ export interface PlaceResult {
   types: string[];
   formattedAddress: string;
   priceLevel?: string;
+  openNow?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -160,6 +161,7 @@ export async function fetchNearbyRestaurants(
       types: p.types ?? [],
       formattedAddress: p.formattedAddress ?? "",
       priceLevel: p.priceLevel,
+      openNow: p.currentOpeningHours?.openNow,
     }));
 }
 

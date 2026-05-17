@@ -20,6 +20,7 @@ export interface Restaurant {
   lat: number;
   lng: number;
   priceLevel?: string;
+  openNow?: boolean;
   reason: PickReason;
   explanation: string;
 }

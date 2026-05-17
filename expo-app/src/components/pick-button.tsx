@@ -81,7 +81,7 @@ export function PickButton({
               style={[
                 styles.buttonText,
                 { color: "#FFFFFF" },
-                isSmallDevice && { fontSize: 18 },
+                isSmallDevice && { fontSize: 16 },
               ]}
             >
               {i18n.t("components.finding_spot")}

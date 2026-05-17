@@ -45,7 +45,7 @@ function buildMapsUrl(
 ): string {
   if (provider === "google") {
     // Use placeId for an exact spot match on Google Maps. If unavailable, fallback to name + address.
-    const queryText = placeId ? name : (address ? `${name}, ${address}` : name);
+    const queryText = placeId ? name : address ? `${name}, ${address}` : name;
     const encodedQuery = encodeURIComponent(queryText);
     let url = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
     if (placeId) {
@@ -53,15 +53,17 @@ function buildMapsUrl(
     }
     return url;
   }
-  
+
   // Apple Maps
-  // By setting `ll` (center) instead of just `sll` (search near) and providing the `q=name`,
-  // Apple Maps will drop a pin EXACTLY at the restaurant's coordinates. 
-  // On iOS, if these coordinates match a known business, it automatically opens the rich place card.
-  // This prevents the map from "jumping" to a similarly named city (e.g. Amani -> Amman).
-  const encodedName = encodeURIComponent(name);
+  // To get the rich place card (reviews, photos, etc.), we MUST perform a search using `q=` and `sll=`.
+  // - If we just search `q=name`, Apple Maps sometimes jumps to a similarly named city (e.g. Amani -> Amman).
+  // - If we search `q=name + full address`, Apple Maps often fails to find the POI and falls back to just showing the street address.
+  // The sweet spot is `q=name + street` (the first part of the address). This disambiguates the search perfectly.
+  const street = address ? address.split(",")[0] : "";
+  const queryText = street ? `${name}, ${street}` : name;
+  const encodedQuery = encodeURIComponent(queryText);
   const coords = `${lat},${lng}`;
-  return `http://maps.apple.com/?q=${encodedName}&ll=${coords}&z=16`;
+  return `http://maps.apple.com/?q=${encodedQuery}&sll=${coords}`;
 }
 
 function openInMaps(
@@ -135,8 +137,10 @@ export function RestaurantCard({
           title: "Open with",
         },
         (buttonIndex) => {
-          if (buttonIndex === 0) openInMaps("apple", name, lat, lng, placeId, formattedAddress);
-          if (buttonIndex === 1) openInMaps("google", name, lat, lng, placeId, formattedAddress);
+          if (buttonIndex === 0)
+            openInMaps("apple", name, lat, lng, placeId, formattedAddress);
+          if (buttonIndex === 1)
+            openInMaps("google", name, lat, lng, placeId, formattedAddress);
         },
       );
     } else {
@@ -293,6 +297,16 @@ export function RestaurantCard({
         >
           {restaurant.formattedAddress}
         </ThemedText>
+
+        {/* Open Status (Backend filters for open places only, but good for UX) */}
+        {restaurant.openNow && (
+          <View style={styles.openStatusContainer}>
+            <View style={[styles.openStatusDot, { backgroundColor: theme.success }]} />
+            <ThemedText style={[styles.openStatusText, { color: theme.success }]}>
+              {i18n.t("components.open_now", { defaultValue: "Open Now" })}
+            </ThemedText>
+          </View>
+        )}
       </View>
       <ThemedText
         style={[
@@ -488,6 +502,22 @@ const styles = StyleSheet.create({
   address: {
     fontSize: 13,
     fontWeight: "500",
+  },
+  // Open Status
+  openStatusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 2,
+  },
+  openStatusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  openStatusText: {
+    fontSize: 13,
+    fontWeight: "600",
   },
   // CTA button
   goButton: {
