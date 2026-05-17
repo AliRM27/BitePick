@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -95,6 +96,8 @@ function ContextSelector({
   onSelect: (ctx: FoodContext) => void;
 }) {
   const theme = useTheme();
+  const { width } = useWindowDimensions();
+  const isSmallDevice = width <= 375;
 
   return (
     <View style={ctxStyles.container}>
@@ -122,12 +125,13 @@ function ContextSelector({
               style={[
                 ctxStyles.label,
                 { color: isActive ? "#FFFFFF" : theme.textSecondary },
+                isSmallDevice && { fontSize: 13 },
               ]}
             >
               {opt.label()}
             </ThemedText>
             <opt.Icon
-              size={18}
+              size={isSmallDevice ? 16 : 18}
               color={isActive ? "#FFFFFF" : theme.textSecondary}
             />
           </Pressable>
@@ -177,6 +181,8 @@ function RadiusSelector({
   const selectedLabel =
     RADIUS_OPTIONS.find((option) => option.meters === selected)?.label ??
     `${selected / 1000} km`;
+  const { width } = useWindowDimensions();
+  const isSmallDevice = width <= 375;
 
   return (
     <View style={radiusStyles.container}>
@@ -219,6 +225,7 @@ function RadiusSelector({
                 style={[
                   radiusStyles.optionLabel,
                   { color: isActive ? "#FFFFFF" : theme.textSecondary },
+                  isSmallDevice && { fontSize: 12 },
                 ]}
               >
                 {option.label}
@@ -280,6 +287,8 @@ const radiusStyles = StyleSheet.create({
 export default function HomeScreen() {
   const router = useRouter();
   const theme = useTheme();
+  const { width } = useWindowDimensions();
+  const isSmallDevice = width <= 375;
   const { getLocation, permissionStatus } = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -401,14 +410,24 @@ export default function HomeScreen() {
         {/* ── Top: Identity Zone ── */}
         <View style={styles.identityZone}>
           <Animated.View entering={FadeInDown.duration(600).delay(400)}>
-            <ThemedText style={[styles.title, { color: theme.text }]}>
+            <ThemedText
+              style={[
+                styles.title,
+                { color: theme.text },
+                isSmallDevice && { fontSize: 34, lineHeight: 40 },
+              ]}
+            >
               {i18n.t("home.title")}
             </ThemedText>
           </Animated.View>
 
           <Animated.View entering={FadeInDown.duration(600).delay(600)}>
             <ThemedText
-              style={[styles.subtitle, { color: theme.textSecondary }]}
+              style={[
+                styles.subtitle,
+                { color: theme.textSecondary },
+                isSmallDevice && { fontSize: 15 },
+              ]}
               key={subtitle}
             >
               {subtitle}
@@ -432,14 +451,21 @@ export default function HomeScreen() {
               <ContextSelector selected={context} onSelect={setContext} />
 
               {/* Radius Selector */}
-              <RadiusSelector selected={radiusMeters} onSelect={setRadiusMeters} />
+              <RadiusSelector
+                selected={radiusMeters}
+                onSelect={setRadiusMeters}
+              />
 
               {/* Pick Button */}
               <PickButton onPress={handlePick} loading={loading} />
 
               {/* Compare placeholder */}
               <ThemedText
-                style={[styles.compareText, { color: theme.textSecondary }]}
+                style={[
+                  styles.compareText,
+                  { color: theme.textSecondary },
+                  isSmallDevice && { fontSize: 12 },
+                ]}
               >
                 {i18n.t("home.compare_coming_soon")}
               </ThemedText>

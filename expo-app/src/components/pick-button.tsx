@@ -1,5 +1,11 @@
 import React, { useEffect } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import * as Haptics from "expo-haptics";
 import Animated, {
   Easing,
@@ -34,6 +40,8 @@ export function PickButton({
   disabled = false,
 }: PickButtonProps) {
   const theme = useTheme();
+  const { width } = useWindowDimensions();
+  const isSmallDevice = width <= 375;
 
   // Press scale animation
   const pressScale = useSharedValue(1);
@@ -69,13 +77,25 @@ export function PickButton({
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator color="#FFF" />
-            <ThemedText style={[styles.buttonText, { color: "#FFFFFF" }]}>
+            <ThemedText
+              style={[
+                styles.buttonText,
+                { color: "#FFFFFF" },
+                isSmallDevice && { fontSize: 18 },
+              ]}
+            >
               {i18n.t("components.finding_spot")}
             </ThemedText>
           </View>
         ) : (
           <View style={styles.contentContainer}>
-            <ThemedText style={[styles.buttonText, { color: "#FFFFFF" }]}>
+            <ThemedText
+              style={[
+                styles.buttonText,
+                { color: "#FFFFFF" },
+                isSmallDevice && { fontSize: 18 },
+              ]}
+            >
               {i18n.t("components.pick_button")}
             </ThemedText>
             {/* <UtensilsCrossed size={30} color="#FFFFFF" /> */}

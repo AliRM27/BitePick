@@ -55,12 +55,13 @@ function buildMapsUrl(
   }
   
   // Apple Maps
-  // Include the address with the name so Apple Maps finds the rich place card 
-  // instead of jumping to a similarly named city.
-  const queryText = address ? `${name}, ${address}` : name;
-  const encodedQuery = encodeURIComponent(queryText);
-  const ll = `${lat},${lng}`;
-  return `http://maps.apple.com/?q=${encodedQuery}&sll=${ll}`;
+  // By setting `ll` (center) instead of just `sll` (search near) and providing the `q=name`,
+  // Apple Maps will drop a pin EXACTLY at the restaurant's coordinates. 
+  // On iOS, if these coordinates match a known business, it automatically opens the rich place card.
+  // This prevents the map from "jumping" to a similarly named city (e.g. Amani -> Amman).
+  const encodedName = encodeURIComponent(name);
+  const coords = `${lat},${lng}`;
+  return `http://maps.apple.com/?q=${encodedName}&ll=${coords}&z=16`;
 }
 
 function openInMaps(
