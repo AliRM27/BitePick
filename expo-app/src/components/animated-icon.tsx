@@ -4,30 +4,47 @@ import { Dimensions, StyleSheet, View } from 'react-native';
 import Animated, { Easing, Keyframe } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
+import { useTheme } from '@/hooks/use-theme';
+
 const INITIAL_SCALE_FACTOR = Dimensions.get('screen').height / 90;
 const DURATION = 600;
 
 export function AnimatedSplashOverlay() {
   const [visible, setVisible] = useState(true);
+  const theme = useTheme();
 
   if (!visible) return null;
 
   const splashKeyframe = new Keyframe({
     0: {
-      transform: [{ scale: INITIAL_SCALE_FACTOR }],
-      opacity: 1,
-    },
-    20: {
       opacity: 1,
     },
     70: {
-      opacity: 0,
-      easing: Easing.elastic(0.7),
+      opacity: 1,
     },
     100: {
       opacity: 0,
+    },
+  });
+
+  const textKeyframe = new Keyframe({
+    0: {
+      transform: [{ scale: 0.95 }],
+      opacity: 0,
+    },
+    30: {
       transform: [{ scale: 1 }],
-      easing: Easing.elastic(0.7),
+      opacity: 1,
+      easing: Easing.out(Easing.quad),
+    },
+    75: {
+      transform: [{ scale: 1 }],
+      opacity: 1,
+    },
+    100: {
+      transform: [{ scale: 1.05 }],
+      opacity: 0,
+      easing: Easing.out(Easing.quad),
     },
   });
 
@@ -39,8 +56,15 @@ export function AnimatedSplashOverlay() {
           scheduleOnRN(setVisible, false);
         }
       })}
-      style={styles.backgroundSolidColor}
-    />
+      style={[styles.backgroundSolidColor, { backgroundColor: theme.background }]}
+    >
+      <Animated.Text
+        style={[styles.splashText, { color: theme.accent }]}
+        entering={textKeyframe.duration(DURATION)}
+      >
+        BitePick
+      </Animated.Text>
+    </Animated.View>
   );
 }
 
@@ -89,7 +113,7 @@ export function AnimatedIcon() {
 
       <Animated.View entering={keyframe.duration(DURATION)} style={styles.background} />
       <Animated.View style={styles.imageContainer} entering={logoKeyframe.duration(DURATION)}>
-        <Image style={styles.image} source={require('@/assets/images/expo-logo.png')} />
+        <Image style={styles.image} source={require('@/assets/images/splash-icon.png')} />
       </Animated.View>
     </View>
   );
@@ -115,11 +139,11 @@ const styles = StyleSheet.create({
   image: {
     position: 'absolute',
     width: 76,
-    height: 71,
+    height: 76,
   },
   background: {
     borderRadius: 40,
-    experimental_backgroundImage: `linear-gradient(180deg, #3C9FFE, #0274DF)`,
+    experimental_backgroundImage: `linear-gradient(180deg, #FAF5E6, #EBD2B6)`,
     width: 128,
     height: 128,
     position: 'absolute',
@@ -127,6 +151,13 @@ const styles = StyleSheet.create({
   backgroundSolidColor: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: '#0D0D0D',
+    justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 1000,
+  },
+  splashText: {
+    fontSize: 48,
+    fontWeight: '800',
+    letterSpacing: -1.5,
   },
 });
