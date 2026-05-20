@@ -34,6 +34,7 @@
     "maps_footer": "选择您偏好的导航地图应用。",
     "about": "关于",
     "privacy_policy": "隐私政策",
+    "terms_of_service": "服务条款",
     "coming_soon": "敬请期待。",
     "ok": "确定",
     "send_feedback": "发送反馈",
@@ -47,6 +48,7 @@
     "walking": "步行",
     "driving": "驾车",
     "reviews": "条评价",
-    "finding_spot": "正在寻找您的位置..."
+    "finding_spot": "正在寻找您的位置...",
+    "open_now": "营业中"
   }
 }

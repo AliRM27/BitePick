@@ -124,7 +124,11 @@ export default function SettingsScreen() {
   };
 
   const handlePrivacyPolicy = () => {
-    Alert.alert(i18n.t("settings.privacy_policy"), i18n.t("settings.coming_soon"), [{ text: i18n.t("settings.ok") }]);
+    Linking.openURL("https://bitepick.netlify.app/privacy");
+  };
+
+  const handleTerms = () => {
+    Linking.openURL("https://bitepick.netlify.app/terms");
   };
 
   const handleSendFeedback = () => {
@@ -226,6 +230,12 @@ export default function SettingsScreen() {
               showChevron
               onPress={handlePrivacyPolicy}
               isFirst
+            />
+            <SettingsRow
+              label={i18n.t("settings.terms_of_service")}
+              icon="⚖️"
+              showChevron
+              onPress={handleTerms}
             />
             <SettingsRow
               label={i18n.t("settings.send_feedback")}

@@ -34,6 +34,7 @@
     "maps_footer": "優先するナビゲーションアプリを選択してください。",
     "about": "アプリについて",
     "privacy_policy": "プライバシーポリシー",
+    "terms_of_service": "利用規約",
     "coming_soon": "近日公開",
     "ok": "OK",
     "send_feedback": "フィードバックを送信",
@@ -47,6 +48,7 @@
     "walking": "徒歩",
     "driving": "車",
     "reviews": "件のレビュー",
-    "finding_spot": "スポットを探しています..."
+    "finding_spot": "スポットを探しています...",
+    "open_now": "営業中"
   }
 }

@@ -34,6 +34,7 @@
     "maps_footer": "Wähle deine bevorzugte Karten-App.",
     "about": "ÜBER",
     "privacy_policy": "Datenschutzerklärung",
+    "terms_of_service": "Nutzungsbedingungen",
     "coming_soon": "Kommt bald.",
     "ok": "OK",
     "send_feedback": "Feedback senden",
@@ -47,6 +48,7 @@
     "walking": "Zu Fuß",
     "driving": "Auto",
     "reviews": "Bewertungen",
-    "finding_spot": "Suche nach deinem Ort..."
+    "finding_spot": "Suche nach deinem Ort...",
+    "open_now": "Jetzt geöffnet"
   }
 }

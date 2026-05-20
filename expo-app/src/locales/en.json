@@ -34,6 +34,7 @@
     "maps_footer": "Choose your preferred maps app for navigation.",
     "about": "ABOUT",
     "privacy_policy": "Privacy Policy",
+    "terms_of_service": "Terms of Service",
     "coming_soon": "Coming soon.",
     "ok": "OK",
     "send_feedback": "Send Feedback",
@@ -47,6 +48,7 @@
     "walking": "Walking",
     "driving": "Driving",
     "reviews": "reviews",
-    "finding_spot": "Finding your spot..."
+    "finding_spot": "Finding your spot...",
+    "open_now": "Open Now"
   }
 }

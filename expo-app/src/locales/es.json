@@ -34,6 +34,7 @@
     "maps_footer": "Elige tu aplicación de mapas preferida.",
     "about": "ACERCA DE",
     "privacy_policy": "Política de Privacidad",
+    "terms_of_service": "Términos de Servicio",
     "coming_soon": "Próximamente.",
     "ok": "Aceptar",
     "send_feedback": "Enviar comentarios",
@@ -47,6 +48,7 @@
     "walking": "Caminando",
     "driving": "Manejando",
     "reviews": "reseñas",
-    "finding_spot": "Buscando tu lugar..."
+    "finding_spot": "Buscando tu lugar...",
+    "open_now": "Abierto ahora"
   }
 }
