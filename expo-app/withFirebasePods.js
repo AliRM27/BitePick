@@ -11,6 +11,9 @@ const withFirebasePods = (config) => {
 
       const injection = `
   installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['SWIFT_VERSION'] = '5.0'
+    end
     if target.name.start_with?('RNFB')
       target.build_configurations.each do |config|
         config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
