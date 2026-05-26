@@ -7,11 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Set theme helper
   const setTheme = (theme) => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('bitepick-theme', theme);
+    localStorage.setItem('cupmap-theme', theme);
   };
 
   // Initial state check
-  const savedTheme = localStorage.getItem('bitepick-theme');
+  const savedTheme = localStorage.getItem('cupmap-theme');
   const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
   
   if (savedTheme) {

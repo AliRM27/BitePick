@@ -530,7 +530,7 @@ ul {
   font-family: var(--font-body);
 }
 
-/* Simulator elements matching BitePick design */
+/* Simulator elements matching CupMap design */
 .sim-header {
   display: flex;
   justify-content: space-between;

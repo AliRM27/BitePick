@@ -124,11 +124,11 @@ export default function SettingsScreen() {
   };
 
   const handlePrivacyPolicy = () => {
-    Linking.openURL("https://bitepick.netlify.app/privacy");
+    Linking.openURL("https://cupmap.netlify.app/privacy");
   };
 
   const handleTerms = () => {
-    Linking.openURL("https://bitepick.netlify.app/terms");
+    Linking.openURL("https://cupmap.netlify.app/terms");
   };
 
   const handleSendFeedback = () => {
