@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "BitePick",
+    "name": "CupMap",
     "slug": "bitepick",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
     "ios": {
       "icon": "./assets/bitePickerIcon.icon",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "BitePick needs your location to find nearby restaurants.",
+        "NSLocationWhenInUseUsageDescription": "CupMap needs your location to find nearby restaurants.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.alirm.bitepick",
@@ -46,7 +46,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "BitePick needs your location to find the best restaurants near you."
+          "locationWhenInUsePermission": "CupMap needs your location to find the best restaurants near you."
         }
       ],
       [

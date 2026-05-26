@@ -48,9 +48,9 @@ const CONTEXT_OPTIONS: {
   Icon: React.ElementType;
   label: () => string;
 }[] = [
-  { key: "coffee", Icon: Coffee, label: () => i18n.t("home.context_coffee") },
-  { key: "food", Icon: Utensils, label: () => i18n.t("home.context_food") },
-];
+    { key: "coffee", Icon: Coffee, label: () => i18n.t("home.context_coffee") },
+    { key: "food", Icon: Utensils, label: () => i18n.t("home.context_food") },
+  ];
 
 const RADIUS_OPTIONS = [
   { meters: 500, label: "0.5 km" },
@@ -438,7 +438,7 @@ export default function HomeScreen() {
         {/* ── Bottom: Interaction Zone ── */}
         <Animated.View
           entering={FadeInUp.duration(600).delay(800)}
-          style={styles.interactionZone}
+          style={[styles.interactionZone, isSmallDevice && { gap: Spacing.three }]}
         >
           {permissionStatus === "denied" ? (
             <LocationPermissionView />
@@ -460,7 +460,7 @@ export default function HomeScreen() {
               <PickButton onPress={handlePick} loading={loading} />
 
               {/* Compare placeholder */}
-              <ThemedText
+              {/* <ThemedText
                 style={[
                   styles.compareText,
                   { color: theme.textSecondary },
@@ -468,7 +468,7 @@ export default function HomeScreen() {
                 ]}
               >
                 {i18n.t("home.compare_coming_soon")}
-              </ThemedText>
+              </ThemedText> */}
             </>
           )}
         </Animated.View>
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     paddingHorizontal: Spacing.four,
     paddingBottom: Spacing.five,
-    gap: Spacing.three,
+    gap: Spacing.five,
   },
 
   compareText: {

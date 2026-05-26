@@ -59,10 +59,10 @@ export function AnimatedSplashOverlay() {
       style={[styles.backgroundSolidColor, { backgroundColor: theme.background }]}
     >
       <Animated.Text
-        style={[styles.splashText, { color: theme.accent }]}
+        style={[styles.splashText, { color: "#E95D21" }]}
         entering={textKeyframe.duration(DURATION)}
       >
-        BitePick
+        CupMap
       </Animated.Text>
     </Animated.View>
   );
