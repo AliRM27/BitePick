@@ -14,7 +14,7 @@
     "error_generic": "エラーが発生しました。もう一度お試しください。",
     "error_location_denied": "位置情報を取得できません。権限を確認してください。",
     "permission_title": "位置情報が必要です",
-    "permission_subtitle": "BitePickは、近くの最高のスポットを見つけるために位置情報を必要とします。",
+    "permission_subtitle": "CupMapは、近くの最高のスポットを見つけるために位置情報を必要とします。",
     "permission_button": "設定を開く"
   },
   "result": {

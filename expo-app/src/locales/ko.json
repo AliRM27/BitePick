@@ -14,7 +14,7 @@
     "error_generic": "문제가 발생했습니다. 다시 시도해주세요.",
     "error_location_denied": "위치를 가져올 수 없습니다. 권한을 확인해주세요.",
     "permission_title": "위치 필요",
-    "permission_subtitle": "BitePick은 주변 최고의 장소를 찾기 위해 위치 정보가 필요합니다.",
+    "permission_subtitle": "CupMap은 주변 최고의 장소를 찾기 위해 위치 정보가 필요합니다.",
     "permission_button": "설정 열기"
   },
   "result": {

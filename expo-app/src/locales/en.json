@@ -14,7 +14,7 @@
     "error_generic": "Something went wrong. Please try again.",
     "error_location_denied": "Couldn't get your location. Please check permissions and try again.",
     "permission_title": "Location Required",
-    "permission_subtitle": "BitePick needs your location to find the best spots around you.",
+    "permission_subtitle": "CupMap needs your location to find the best spots around you.",
     "permission_button": "Open Settings"
   },
   "result": {

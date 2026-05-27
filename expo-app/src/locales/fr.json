@@ -14,7 +14,7 @@
     "error_generic": "Quelque chose s'est mal passé. Veuillez réessayer.",
     "error_location_denied": "Impossible d'obtenir votre position. Vérifiez les autorisations.",
     "permission_title": "Localisation Requise",
-    "permission_subtitle": "BitePick a besoin de votre position pour trouver les meilleurs endroits autour de vous.",
+    "permission_subtitle": "CupMap a besoin de votre position pour trouver les meilleurs endroits autour de vous.",
     "permission_button": "Ouvrir les Réglages"
   },
   "result": {
