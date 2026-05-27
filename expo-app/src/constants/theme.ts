@@ -1,5 +1,5 @@
 /**
- * BitePick Design System
+ * CupMap Design System
  *
  * Premium dark-first palette with warm food-themed accent colors.
  */

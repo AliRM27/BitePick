@@ -16,7 +16,7 @@ import { trackAppOpen } from "@/services/analytics";
 const queryClient = new QueryClient();
 
 /**
- * BitePick root layout — simple stack navigator.
+ * CupMap root layout — simple stack navigator.
  * Home → Result flow, no tabs.
  */
 export default function RootLayout() {
@@ -28,7 +28,7 @@ export default function RootLayout() {
     trackAppOpen();
   }, []);
 
-  // Customize the navigation themes to match BitePick branding
+  // Customize the navigation themes to match CupMap branding
   const BitePickDark = {
     ...DarkTheme,
     colors: {

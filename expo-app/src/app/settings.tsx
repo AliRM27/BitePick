@@ -133,7 +133,7 @@ export default function SettingsScreen() {
 
   const handleSendFeedback = () => {
     Linking.openURL(
-      "mailto:lotustudio.app@gmail.com?subject=BitePick Feedback",
+      "mailto:lotustudio.app@gmail.com?subject=CupMap Feedback",
     );
   };
 

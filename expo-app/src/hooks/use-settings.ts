@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type MapsPreference = "apple" | "google" | "ask";
 
-const STORAGE_KEY = "@bitepick/maps_preference";
+const STORAGE_KEY = "@cupmap/maps_preference";
 const DEFAULT_PREFERENCE: MapsPreference = "ask";
 
 /* ------------------------------------------------------------------ */

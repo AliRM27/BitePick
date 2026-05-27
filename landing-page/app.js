@@ -191,38 +191,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ==========================================================================
-     5. Contact Form Submission Handling
-     ========================================================================== */
-  const contactForm = document.getElementById('contact-form');
-  const submitBtn = document.getElementById('submit-btn');
-  const toast = document.getElementById('toast');
-
-  if (contactForm && submitBtn) {
-    contactForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      const originalText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `Sending...`;
-
-      // Simulate API call
-      setTimeout(() => {
-        // Show success toast
-        if (toast) {
-          toast.classList.add('show');
-          
-          // Hide toast after 4 seconds
-          setTimeout(() => {
-            toast.classList.remove('show');
-          }, 4000);
-        }
-
-        // Reset Form
-        contactForm.reset();
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-      }, 1500);
-    });
-  }
 });
+
