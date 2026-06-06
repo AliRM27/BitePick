@@ -11,7 +11,19 @@
       "icon": "./assets/bitePickerIcon.icon",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "CupMap needs your location to find nearby restaurants.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleLocalizations": [
+          "en",
+          "de",
+          "fr",
+          "it",
+          "es",
+          "ru",
+          "ja",
+          "ko",
+          "pt",
+          "zh"
+        ]
       },
       "bundleIdentifier": "com.alirm.bitepick",
       "googleServicesFile": "./GoogleService-Info.plist"
