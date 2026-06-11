@@ -2,7 +2,7 @@ import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
-} from "@react-navigation/native";
+} from "expo-router/react-navigation";
 import { router, Stack } from "expo-router";
 import React, { useEffect } from "react";
 import { Button, useColorScheme } from "react-native";

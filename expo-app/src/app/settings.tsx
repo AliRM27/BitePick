@@ -14,7 +14,7 @@ import { Stack, useRouter } from "expo-router";
 import Constants from "expo-constants";
 import React from "react";
 import { Alert, Linking, Platform, StyleSheet, View } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
+import { useHeaderHeight } from "expo-router/react-navigation";
 import * as Haptics from "expo-haptics";
 import Animated, {
   interpolate,
