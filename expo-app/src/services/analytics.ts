@@ -1,20 +1,32 @@
 import {
   getAnalytics,
   logEvent as firebaseLogEvent,
+  setAnalyticsCollectionEnabled,
 } from "@react-native-firebase/analytics";
 import type { Restaurant } from "@/types/restaurant";
+
+// Disable automatic collection in dev mode to avoid any background event tracking
+try {
+  const analyticsInstance = getAnalytics();
+  setAnalyticsCollectionEnabled(analyticsInstance, !__DEV__).catch((err) => {
+    console.warn("[Analytics] Failed to set analytics collection enabled:", err);
+  });
+} catch (err) {
+  console.warn("[Analytics] Failed to initialize analytics instance:", err);
+}
 
 /**
  * Centralized logging function that handles errors and console logs in dev mode.
  */
 const logEvent = async (eventName: string, params?: Record<string, any>) => {
-  // if (__DEV__) {
-  //   console.log(
-  //     `[Analytics] 📊 ${eventName}`,
-  //     params ? JSON.stringify(params, null, 2) : '',
-  //   );
-  // }
-
+  if (__DEV__) {
+    console.log(
+      `[Analytics Dev Mode] 📊 ${eventName}`,
+      params ? JSON.stringify(params, null, 2) : '',
+    );
+    return;
+  }
+  console.log("TEST")
   try {
     const analyticsInstance = getAnalytics();
     await firebaseLogEvent(analyticsInstance, eventName, params || {});
