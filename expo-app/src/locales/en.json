@@ -1,4 +1,42 @@
 {
+  "tabs": {
+    "discover": "Discover",
+    "map": "Map",
+    "saved": "Saved"
+  },
+  "onboarding": {
+    "welcome_title": "Never wonder\nwhere to eat again",
+    "welcome_subtitle": "CupMap picks the best spot near you in one tap — no scrolling, no debating.",
+    "welcome_cta": "Get Started",
+    "welcome_bullet_instant": "One-tap picks, instantly",
+    "welcome_bullet_no_scrolling": "No more endless scrolling",
+    "welcome_bullet_private": "Your data stays on your device",
+    "preferences_title": "What do you like?",
+    "preferences_subtitle": "We'll use this to fine-tune your picks. You can change it anytime.",
+    "cuisine_section_title": "Cuisines you enjoy",
+    "cuisine_italian": "Italian",
+    "cuisine_asian": "Asian",
+    "cuisine_mexican": "Mexican",
+    "cuisine_american": "American",
+    "cuisine_mediterranean": "Mediterranean",
+    "cuisine_cafe": "Cafe & Bakery",
+    "cuisine_indian": "Indian",
+    "cuisine_middle_eastern": "Middle Eastern",
+    "dietary_section_title": "Dietary needs",
+    "dietary_vegetarian": "Vegetarian",
+    "dietary_vegan": "Vegan",
+    "dietary_gluten_free": "Gluten-Free",
+    "dietary_halal": "Halal",
+    "dietary_none": "No restrictions",
+    "price_title": "What's your budget?",
+    "price_subtitle": "Pick the price ranges you're usually comfortable with.",
+    "location_title": "Find what's near you",
+    "location_subtitle": "CupMap needs your location to recommend spots close by. We only use it while you're using the app.",
+    "location_cta_enable": "Enable Location",
+    "location_cta_skip": "Not Now",
+    "continue": "Continue",
+    "skip": "Skip"
+  },
   "home": {
     "title": "Where should\nI eat?",
     "tagline_0": "Craving something new? 🌮",
@@ -25,6 +63,27 @@
     "of": "of",
     "seen_all": "You've seen all picks 🎯"
   },
+  "map": {
+    "replace_recommendation": "Make this my pick",
+    "replaced_confirmation": "Updated your pick ✓",
+    "empty_state_title": "Pick a spot first",
+    "empty_state_subtitle": "Run a search on Discover, then come back here to explore your options on the map.",
+    "view_full_details": "View details",
+    "web_unavailable_note": "Map view isn't available on web yet — here's the list of spots instead."
+  },
+  "saved": {
+    "title": "Saved",
+    "filter_all": "All",
+    "filter_want_to_try": "Want to Try",
+    "filter_visited": "Visited",
+    "empty_title": "No saved spots yet",
+    "empty_subtitle": "Bookmark a pick from Discover or Map to build your list.",
+    "mark_visited": "Mark as visited",
+    "unsave_confirm_title": "Remove from Saved?",
+    "unsave_confirm_message": "This will remove it from your saved list.",
+    "cancel": "Cancel",
+    "remove": "Remove"
+  },
   "settings": {
     "title": "Settings",
     "preferences": "PREFERENCES",
@@ -49,6 +108,10 @@
     "driving": "Driving",
     "reviews": "reviews",
     "finding_spot": "Finding your spot...",
-    "open_now": "Open Now"
+    "open_now": "Open Now",
+    "save": "Save",
+    "unsave": "Remove from saved",
+    "like": "Like",
+    "dislike": "Dislike"
   }
 }

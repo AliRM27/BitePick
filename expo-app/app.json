@@ -84,7 +84,8 @@
       "expo-web-browser",
       "expo-font",
       "expo-localization",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-maps"
     ],
     "experiments": {
       "typedRoutes": true,

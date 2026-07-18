@@ -3,6 +3,7 @@ import {
   logEvent as firebaseLogEvent,
   setAnalyticsCollectionEnabled,
 } from "@react-native-firebase/analytics";
+import type { TastePreferences } from "@/hooks/use-preferences";
 import type { Restaurant } from "@/types/restaurant";
 
 // Disable automatic collection in dev mode to avoid any background event tracking
@@ -118,4 +119,121 @@ export const trackLocationPermissionState = (
   logEvent("location_permission_state", {
     status,
   });
+};
+
+/**
+ * Track each onboarding screen as the user reaches it.
+ */
+export const trackOnboardingStepViewed = (step: string, stepIndex: number) => {
+  logEvent("onboarding_step_viewed", {
+    step,
+    step_index: stepIndex,
+  });
+};
+
+/**
+ * Track onboarding completion — the preferences collected and whether
+ * location permission was granted during the flow.
+ */
+export const trackOnboardingCompleted = (
+  preferences: TastePreferences,
+  locationGranted: boolean,
+) => {
+  logEvent("onboarding_completed", {
+    cuisines: preferences.cuisines.join(","),
+    dietary: preferences.dietary.join(","),
+    price_levels: preferences.priceLevels.join(","),
+    location_granted: locationGranted,
+  });
+};
+
+/**
+ * Track when the user skips the location-permission primer.
+ */
+export const trackOnboardingSkippedLocation = () => {
+  logEvent("onboarding_skipped_location");
+};
+
+/**
+ * Track when a restaurant is promoted to Discover's active pick from
+ * somewhere other than swiping — e.g. the Map tab or a detail view.
+ */
+export const trackReplaceRecommendation = (
+  restaurant: Pick<Restaurant, "name" | "placeId" | "rating" | "distanceKm">,
+  source: "map" | "map_web_list" | "result_detail",
+) => {
+  logEvent("replace_recommendation", {
+    restaurant_name: restaurant.name,
+    place_id: restaurant.placeId,
+    rating: restaurant.rating,
+    distance_km: Number(restaurant.distanceKm.toFixed(2)),
+    source,
+  });
+};
+
+/**
+ * Track a restaurant being bookmarked to the Saved tab.
+ */
+export const trackSaveRestaurant = (
+  restaurant: Pick<Restaurant, "name" | "placeId" | "rating" | "distanceKm">,
+  context: string,
+) => {
+  logEvent("save_restaurant", {
+    restaurant_name: restaurant.name,
+    place_id: restaurant.placeId,
+    rating: restaurant.rating,
+    distance_km: Number(restaurant.distanceKm.toFixed(2)),
+    context,
+  });
+};
+
+/**
+ * Track a restaurant being removed from the Saved tab.
+ */
+export const trackUnsaveRestaurant = (placeId: string) => {
+  logEvent("unsave_restaurant", { place_id: placeId });
+};
+
+/**
+ * Track a like/dislike signal — captured now as a future ranking input.
+ */
+export const trackFeedback = (
+  placeId: string,
+  feedback: "liked" | "disliked",
+) => {
+  logEvent("restaurant_feedback", { place_id: placeId, feedback });
+};
+
+/**
+ * Track a saved restaurant moving between "want to try" and "visited".
+ */
+export const trackSavedStatusChanged = (
+  placeId: string,
+  status: "want_to_try" | "visited",
+) => {
+  logEvent("saved_status_changed", { place_id: placeId, status });
+};
+
+/**
+ * Track a map pin tap opening the quick-preview sheet.
+ */
+export const trackMapPinTapped = (
+  restaurant: Pick<Restaurant, "name" | "placeId" | "rating" | "distanceKm">,
+  index: number,
+) => {
+  logEvent("map_pin_tapped", {
+    restaurant_name: restaurant.name,
+    place_id: restaurant.placeId,
+    rating: restaurant.rating,
+    distance_km: Number(restaurant.distanceKm.toFixed(2)),
+    index,
+  });
+};
+
+/**
+ * Track the web list fallback being shown in place of the native map —
+ * a useful signal for whether investing in a real web map is worth it.
+ */
+export const trackMapWebFallbackShown = () => {
+  logEvent("map_web_fallback_shown");
 };

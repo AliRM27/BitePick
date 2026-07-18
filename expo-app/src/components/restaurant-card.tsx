@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import * as Haptics from "expo-haptics";
+import { Ionicons } from "@expo/vector-icons";
 
 import { StarRating } from "@/components/star-rating";
 import { ThemedText } from "@/components/themed-text";
@@ -89,6 +90,12 @@ interface RestaurantCardProps {
   veryCompact?: boolean;
   index?: number;
   category?: string;
+  /** Renders a bookmark toggle over the photo when provided. */
+  isSaved?: boolean;
+  onToggleSave?: () => void;
+  /** Renders a thumbs-up/down row next to the CTA when provided. */
+  feedback?: "liked" | "disliked" | null;
+  onFeedback?: (value: "liked" | "disliked" | null) => void;
 }
 
 /**
@@ -103,11 +110,30 @@ export function RestaurantCard({
   veryCompact = false,
   index,
   category,
+  isSaved,
+  onToggleSave,
+  feedback,
+  onFeedback,
 }: RestaurantCardProps) {
   const theme = useTheme();
   const { mapsPreference } = useSettings();
   const badge = REASON_BADGE[restaurant.reason] || REASON_BADGE.top_pick;
   const photoIdentity = restaurant.photoUrl ?? restaurant.placeId;
+
+  const handleToggleSave = useCallback(() => {
+    Haptics.selectionAsync();
+    onToggleSave?.();
+  }, [onToggleSave]);
+
+  const handleThumbUp = useCallback(() => {
+    Haptics.selectionAsync();
+    onFeedback?.(feedback === "liked" ? null : "liked");
+  }, [feedback, onFeedback]);
+
+  const handleThumbDown = useCallback(() => {
+    Haptics.selectionAsync();
+    onFeedback?.(feedback === "disliked" ? null : "disliked");
+  }, [feedback, onFeedback]);
 
   const handleGoThere = useCallback(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -196,35 +222,57 @@ export function RestaurantCard({
       </View> */}
 
       {/* Photo */}
-      {restaurant.photoUrl ? (
-        <View
-          style={[
-            styles.photoContainer,
-            photoHeight ? { height: photoHeight } : null,
-            { backgroundColor: theme.backgroundElement },
-          ]}
-        >
-          <Image
-            key={photoIdentity}
-            recyclingKey={photoIdentity}
-            source={{ uri: restaurant.photoUrl }}
-            style={styles.photo}
-            contentFit="cover"
-            transition={0}
-          />
-        </View>
-      ) : (
-        <View
-          style={[
-            styles.photoContainer,
-            styles.photoPlaceholder,
-            photoHeight ? { height: photoHeight } : null,
-            { backgroundColor: theme.backgroundElement },
-          ]}
-        >
-          <ThemedText style={styles.placeholderEmoji}>🍴</ThemedText>
-        </View>
-      )}
+      <View style={styles.photoWrapper}>
+        {restaurant.photoUrl ? (
+          <View
+            style={[
+              styles.photoContainer,
+              photoHeight ? { height: photoHeight } : null,
+              { backgroundColor: theme.backgroundElement },
+            ]}
+          >
+            <Image
+              key={photoIdentity}
+              recyclingKey={photoIdentity}
+              source={{ uri: restaurant.photoUrl }}
+              style={styles.photo}
+              contentFit="cover"
+              transition={0}
+            />
+          </View>
+        ) : (
+          <View
+            style={[
+              styles.photoContainer,
+              styles.photoPlaceholder,
+              photoHeight ? { height: photoHeight } : null,
+              { backgroundColor: theme.backgroundElement },
+            ]}
+          >
+            <ThemedText style={styles.placeholderEmoji}>🍴</ThemedText>
+          </View>
+        )}
+
+        {onToggleSave && (
+          <Pressable
+            onPress={handleToggleSave}
+            hitSlop={8}
+            accessibilityLabel={i18n.t(
+              isSaved ? "components.unsave" : "components.save",
+            )}
+            style={({ pressed }) => [
+              styles.bookmarkButton,
+              pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
+            ]}
+          >
+            <Ionicons
+              name={isSaved ? "bookmark" : "bookmark-outline"}
+              size={18}
+              color={isSaved ? theme.accent : "#FFFFFF"}
+            />
+          </Pressable>
+        )}
+      </View>
 
       {/* Info Section */}
       <View
@@ -319,28 +367,72 @@ export function RestaurantCard({
       >
         ✨ {restaurant.explanation}
       </ThemedText>
-      {/* Go There Button */}
-      <Pressable
-        onPress={handleGoThere}
-        style={({ pressed }) => [
-          styles.goButton,
-          compact && styles.goButtonCompact,
-          veryCompact && styles.goButtonVeryCompact,
-          { backgroundColor: theme.accent },
-          pressed && styles.goButtonPressed,
-        ]}
-      >
-        <ThemedText
-          style={[
-            styles.goButtonText,
-            compact && styles.goButtonTextCompact,
-            veryCompact && styles.goButtonTextVeryCompact,
+      {/* Go There Button (+ optional feedback thumbs) */}
+      <View style={styles.ctaRow}>
+        {onFeedback && (
+          <Pressable
+            onPress={handleThumbDown}
+            hitSlop={8}
+            accessibilityLabel={i18n.t("components.dislike")}
+            style={({ pressed }) => [
+              styles.thumbButton,
+              compact && styles.thumbButtonCompact,
+              { backgroundColor: theme.backgroundElement },
+              feedback === "disliked" && { backgroundColor: theme.accentSoft },
+              pressed && { opacity: 0.8 },
+            ]}
+          >
+            <Ionicons
+              name={feedback === "disliked" ? "thumbs-down" : "thumbs-down-outline"}
+              size={18}
+              color={feedback === "disliked" ? theme.accent : theme.textSecondary}
+            />
+          </Pressable>
+        )}
+
+        <Pressable
+          onPress={handleGoThere}
+          style={({ pressed }) => [
+            styles.goButton,
+            compact && styles.goButtonCompact,
+            veryCompact && styles.goButtonVeryCompact,
+            { backgroundColor: theme.accent },
+            pressed && styles.goButtonPressed,
           ]}
-          numberOfLines={1}
         >
-          {i18n.t("components.take_me_there")}
-        </ThemedText>
-      </Pressable>
+          <ThemedText
+            style={[
+              styles.goButtonText,
+              compact && styles.goButtonTextCompact,
+              veryCompact && styles.goButtonTextVeryCompact,
+            ]}
+            numberOfLines={1}
+          >
+            {i18n.t("components.take_me_there")}
+          </ThemedText>
+        </Pressable>
+
+        {onFeedback && (
+          <Pressable
+            onPress={handleThumbUp}
+            hitSlop={8}
+            accessibilityLabel={i18n.t("components.like")}
+            style={({ pressed }) => [
+              styles.thumbButton,
+              compact && styles.thumbButtonCompact,
+              { backgroundColor: theme.backgroundElement },
+              feedback === "liked" && { backgroundColor: theme.accentSoft },
+              pressed && { opacity: 0.8 },
+            ]}
+          >
+            <Ionicons
+              name={feedback === "liked" ? "thumbs-up" : "thumbs-up-outline"}
+              size={18}
+              color={feedback === "liked" ? theme.accent : theme.textSecondary}
+            />
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 }
@@ -400,6 +492,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   // Photo
+  photoWrapper: {
+    position: "relative",
+  },
   photoContainer: {
     width: "100%",
     height: 180,
@@ -416,6 +511,17 @@ const styles = StyleSheet.create({
   },
   placeholderEmoji: {
     fontSize: 48,
+  },
+  bookmarkButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.full,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
   // Info
   infoSection: {
@@ -519,9 +625,26 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
+  // CTA row
+  ctaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    width: "100%",
+  },
+  thumbButton: {
+    width: 48,
+    height: 52,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  thumbButtonCompact: {
+    height: 48,
+  },
   // CTA button
   goButton: {
-    width: "100%",
+    flex: 1,
     height: 52,
     borderRadius: BorderRadius.md,
     alignItems: "center",

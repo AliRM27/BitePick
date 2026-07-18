@@ -1,67 +1,93 @@
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
-import Animated, { Easing, Keyframe } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  Keyframe,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { useTheme } from '@/hooks/use-theme';
 
 const INITIAL_SCALE_FACTOR = Dimensions.get('screen').height / 90;
 const DURATION = 600;
+const MIN_VISIBLE_MS = 500;
+const FADE_DURATION = 220;
 
-export function AnimatedSplashOverlay() {
+interface AnimatedSplashOverlayProps {
+  /**
+   * When false, the overlay stays fully visible instead of firing its exit
+   * animation — used to hold the splash until an async readiness check
+   * (e.g. the onboarding-completed flag) resolves, avoiding a flash of the
+   * wrong screen underneath.
+   */
+  ready?: boolean;
+}
+
+export function AnimatedSplashOverlay({ ready = true }: AnimatedSplashOverlayProps) {
   const [visible, setVisible] = useState(true);
   const theme = useTheme();
+  const mountedAt = useRef(Date.now());
 
-  if (!visible) return null;
+  const overlayOpacity = useSharedValue(1);
+  const textOpacity = useSharedValue(0);
+  const textScale = useSharedValue(0.95);
 
-  const splashKeyframe = new Keyframe({
-    0: {
-      opacity: 1,
-    },
-    70: {
-      opacity: 1,
-    },
-    100: {
-      opacity: 0,
-    },
-  });
+  // Text entrance — always plays immediately on mount, independent of `ready`.
+  useEffect(() => {
+    textOpacity.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.quad) });
+    textScale.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.quad) });
+  }, [textOpacity, textScale]);
 
-  const textKeyframe = new Keyframe({
-    0: {
-      transform: [{ scale: 0.95 }],
-      opacity: 0,
-    },
-    30: {
-      transform: [{ scale: 1 }],
-      opacity: 1,
-      easing: Easing.out(Easing.quad),
-    },
-    75: {
-      transform: [{ scale: 1 }],
-      opacity: 1,
-    },
-    100: {
-      transform: [{ scale: 1.05 }],
-      opacity: 0,
-      easing: Easing.out(Easing.quad),
-    },
-  });
+  // Exit — only once `ready`, after a minimum on-screen time so the brand
+  // moment doesn't feel like it skips on fast devices where the async
+  // readiness check resolves in a few milliseconds.
+  useEffect(() => {
+    if (!ready) return;
 
-  return (
-    <Animated.View
-      entering={splashKeyframe.duration(DURATION).withCallback((finished) => {
+    const elapsed = Date.now() - mountedAt.current;
+    const delay = Math.max(0, MIN_VISIBLE_MS - elapsed);
+
+    const timer = setTimeout(() => {
+      textOpacity.value = withTiming(0, {
+        duration: FADE_DURATION,
+        easing: Easing.out(Easing.quad),
+      });
+      textScale.value = withTiming(1.05, {
+        duration: FADE_DURATION,
+        easing: Easing.out(Easing.quad),
+      });
+      overlayOpacity.value = withTiming(0, { duration: FADE_DURATION }, (finished) => {
         'worklet';
         if (finished) {
           scheduleOnRN(setVisible, false);
         }
-      })}
-      style={[styles.backgroundSolidColor, { backgroundColor: theme.background }]}
+      });
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [ready, overlayOpacity, textOpacity, textScale]);
+
+  const overlayStyle = useAnimatedStyle(() => ({ opacity: overlayOpacity.value }));
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+    transform: [{ scale: textScale.value }],
+  }));
+
+  if (!visible) return null;
+
+  return (
+    <Animated.View
+      style={[
+        styles.backgroundSolidColor,
+        { backgroundColor: theme.background },
+        overlayStyle,
+      ]}
     >
-      <Animated.Text
-        style={[styles.splashText, { color: "#E95D21" }]}
-        entering={textKeyframe.duration(DURATION)}
-      >
+      <Animated.Text style={[styles.splashText, { color: "#E95D21" }, textStyle]}>
         CupMap
       </Animated.Text>
     </Animated.View>
