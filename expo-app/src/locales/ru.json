@@ -15,7 +15,15 @@
     "error_location_denied": "Не удалось определить ваше местоположение. Проверьте разрешения.",
     "permission_title": "Требуется местоположение",
     "permission_subtitle": "CupMap нужно ваше местоположение, чтобы найти лучшие места вокруг вас.",
-    "permission_button": "Открыть настройки"
+    "permission_button": "Открыть настройки",
+    "category_add_label": "Добавить",
+    "category_add_title": "Добавить категорию",
+    "category_add_subtitle": "Выберите, что ещё показывать на главном экране.",
+    "category_remove_hint": "Удерживайте категорию, чтобы удалить её.",
+    "category_remove_title": "Удалить «%{category}»?",
+    "category_remove_message": "Вы можете вернуть её в любой момент кнопкой «+».",
+    "category_remove_cancel": "Отмена",
+    "category_remove_confirm": "Удалить"
   },
   "result": {
     "swipe_hint": "← Смахните для других вариантов →",

@@ -2,7 +2,8 @@
   "tabs": {
     "discover": "Discover",
     "map": "Map",
-    "saved": "Saved"
+    "saved": "Saved",
+    "profile": "Profile"
   },
   "onboarding": {
     "welcome_title": "Never wonder\nwhere to eat again",
@@ -45,15 +46,32 @@
     "tagline_3": "One tap. One pick. Let us go. 🍔",
     "tagline_4": "Trust the algorithm. 🍣",
     "context_coffee": "Coffee",
-    "context_food": "Restaurants",
+    "context_food": "Food",
+    "context_dessert": "Dessert",
+    "context_bakery": "Bakery",
+    "context_brunch": "Brunch",
+    "context_drinks": "Drinks",
     "radius_label": "Radius",
+    "within_radius": "Within %{radius}",
+    "filters_title": "Tune this pick",
+    "filters_done": "Done",
+    "price_label": "Price",
     "compare_coming_soon": "Compare manually → coming soon",
     "error_no_options": "No great options found nearby. Try a larger radius, different category, or location.",
+    "error_no_filtered_options": "No spots match these filters. Try any price or a larger radius.",
     "error_generic": "Something went wrong. Please try again.",
     "error_location_denied": "Couldn't get your location. Please check permissions and try again.",
     "permission_title": "Location Required",
     "permission_subtitle": "CupMap needs your location to find the best spots around you.",
-    "permission_button": "Open Settings"
+    "permission_button": "Open Settings",
+    "category_add_label": "Add",
+    "category_add_title": "Add a category",
+    "category_add_subtitle": "Pick what else you want on your home screen.",
+    "category_remove_hint": "Long-press a category to remove it.",
+    "category_remove_title": "Remove %{category}?",
+    "category_remove_message": "You can add it back anytime from the + button.",
+    "category_remove_cancel": "Cancel",
+    "category_remove_confirm": "Remove"
   },
   "result": {
     "swipe_hint": "← Swipe for more picks →",

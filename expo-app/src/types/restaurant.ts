@@ -5,7 +5,13 @@ export type PickReason =
   | "popular"
   | "hidden_gem";
 
-export type FoodContext = "food" | "coffee" | "quick_bite";
+export type FoodContext =
+  | "food"
+  | "coffee"
+  | "dessert"
+  | "drinks"
+  | "brunch"
+  | "bakery";
 
 export interface Restaurant {
   placeId: string;

@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 import {
+  Alert,
   Platform,
   Pressable,
   StyleSheet,
@@ -17,7 +18,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import {
+  Gesture,
+  GestureDetector,
+  ScrollView,
+} from "react-native-gesture-handler";
 import Animated, {
   Easing,
   FadeIn,
@@ -32,17 +37,28 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { Coffee, Utensils } from "lucide-react-native";
+import { Coffee, Plus, Settings2 } from "lucide-react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+import { CategoryPickerSheet } from "@/components/category-picker-sheet";
 import { ErrorBanner } from "@/components/error-banner";
+import { FilterSheet } from "@/components/filter-sheet";
 import { LocationPermissionView } from "@/components/location-permission-view";
 import { PickButton } from "@/components/pick-button";
 import { RestaurantCard } from "@/components/restaurant-card";
 import { ThemedText } from "@/components/themed-text";
+import {
+  CONTEXT_OPTION_MAP,
+  categoryLabel,
+  formatPriceLabel,
+  formatRadiusLabel,
+  type ContextOption,
+  type PriceFilter,
+} from "@/constants/categories";
 import { BorderRadius, Spacing } from "@/constants/theme";
 import { useDiscoverContext } from "@/context/discover-context";
 import i18n from "@/i18n";
+import { useCategories } from "@/hooks/use-categories";
 import { useLocation } from "@/hooks/use-location";
 import { usePreferences } from "@/hooks/use-preferences";
 import { useRestaurantSearch } from "@/hooks/use-restaurant-search";
@@ -63,65 +79,67 @@ function clamp(value: number, min: number, max: number) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Context options                                                    */
-/* ------------------------------------------------------------------ */
-
-const CONTEXT_OPTIONS: {
-  key: FoodContext;
-  Icon: React.ElementType;
-  label: () => string;
-}[] = [
-  { key: "coffee", Icon: Coffee, label: () => i18n.t("home.context_coffee") },
-  { key: "food", Icon: Utensils, label: () => i18n.t("home.context_food") },
-];
-
-const RADIUS_OPTIONS = [
-  { meters: 500, label: "0.5 km" },
-  { meters: 1000, label: "1 km" },
-  { meters: 3000, label: "3 km" },
-  { meters: 5000, label: "5 km" },
-] as const;
-
-const SUGGESTIONS = [
-  () => i18n.t("home.tagline_0"),
-  () => i18n.t("home.tagline_1"),
-  () => i18n.t("home.tagline_2"),
-  () => i18n.t("home.tagline_3"),
-  () => i18n.t("home.tagline_4"),
-];
-
-function useRotatingText(items: (() => string)[], intervalMs = 3000) {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % items.length);
-    }, intervalMs);
-    return () => clearInterval(timer);
-  }, [items.length, intervalMs]);
-
-  return items[index]();
-}
-
-/* ------------------------------------------------------------------ */
 /*  Context Selector                                                   */
 /* ------------------------------------------------------------------ */
 
 function ContextSelector({
+  categories,
   selected,
   onSelect,
+  onRemove,
+  onAdd,
+  canAdd,
+  isRemovable,
 }: {
+  categories: FoodContext[];
   selected: FoodContext;
   onSelect: (ctx: FoodContext) => void;
+  onRemove: (ctx: FoodContext) => void;
+  onAdd: () => void;
+  canAdd: boolean;
+  isRemovable: (ctx: FoodContext) => boolean;
 }) {
   const theme = useTheme();
   const { width } = useWindowDimensions();
   const isSmallDevice = width <= 375;
+  const iconSize = isSmallDevice ? 19 : 22;
+
+  const confirmRemove = (opt: ContextOption) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    // react-native-web has no Alert implementation, so a confirm dialog
+    // there would silently swallow the removal — remove straight away.
+    if (Platform.OS === "web") {
+      onRemove(opt.key);
+      return;
+    }
+
+    Alert.alert(
+      i18n.t("home.category_remove_title", { category: opt.label() }),
+      i18n.t("home.category_remove_message"),
+      [
+        { text: i18n.t("home.category_remove_cancel"), style: "cancel" },
+        {
+          text: i18n.t("home.category_remove_confirm"),
+          style: "destructive",
+          onPress: () => onRemove(opt.key),
+        },
+      ],
+    );
+  };
 
   return (
-    <View style={ctxStyles.container}>
-      {CONTEXT_OPTIONS.map((opt) => {
+    <ScrollView
+      contentContainerStyle={ctxStyles.container}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+    >
+      {categories.map((category) => {
+        const opt = CONTEXT_OPTION_MAP[category];
+        if (!opt) return null;
         const isActive = selected === opt.key;
+        const removable = isRemovable(opt.key);
+
         return (
           <Pressable
             key={opt.key}
@@ -129,169 +147,185 @@ function ContextSelector({
               Haptics.selectionAsync();
               onSelect(opt.key);
             }}
-            style={[
-              ctxStyles.pill,
-              {
-                backgroundColor: isActive
-                  ? theme.accent
-                  : theme.backgroundElement,
-                borderColor: isActive ? theme.accent : theme.border,
-              },
-            ]}
+            onLongPress={removable ? () => confirmRemove(opt) : undefined}
+            delayLongPress={400}
+            style={ctxStyles.item}
           >
+            <View
+              style={[
+                ctxStyles.iconCircle,
+                {
+                  backgroundColor: isActive
+                    ? theme.accent
+                    : theme.backgroundElement,
+                },
+              ]}
+            >
+              <opt.Icon
+                size={iconSize}
+                color={isActive ? "#FFFFFF" : theme.textSecondary}
+                strokeWidth={2}
+              />
+            </View>
             <ThemedText
               style={[
                 ctxStyles.label,
-                { color: isActive ? "#FFFFFF" : theme.textSecondary },
-                isSmallDevice && { fontSize: 13 },
+                {
+                  color: isActive ? theme.accent : theme.textSecondary,
+                },
+                isSmallDevice && { fontSize: 12 },
               ]}
+              numberOfLines={1}
             >
               {opt.label()}
             </ThemedText>
-            <opt.Icon
-              size={isSmallDevice ? 16 : 18}
-              color={isActive ? "#FFFFFF" : theme.textSecondary}
-            />
           </Pressable>
         );
       })}
-    </View>
+
+      {canAdd && (
+        <Pressable
+          onPress={() => {
+            Haptics.selectionAsync();
+            onAdd();
+          }}
+          style={ctxStyles.item}
+          accessibilityRole="button"
+          accessibilityLabel={i18n.t("home.category_add_title")}
+        >
+          <View
+            style={[
+              ctxStyles.iconCircle,
+              ctxStyles.addCircle,
+              { borderColor: theme.border },
+            ]}
+          >
+            <Plus size={iconSize} color={theme.textSecondary} strokeWidth={2} />
+          </View>
+          <ThemedText
+            style={[
+              ctxStyles.label,
+              { color: theme.textSecondary },
+              isSmallDevice && { fontSize: 12 },
+            ]}
+            numberOfLines={1}
+          >
+            {i18n.t("home.category_add_label")}
+          </ThemedText>
+        </Pressable>
+      )}
+    </ScrollView>
   );
 }
 
 const ctxStyles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    gap: 12,
-    justifyContent: "center",
-    flexWrap: "wrap",
+    gap: 16,
+    paddingRight: Spacing.four,
   },
-  pill: {
-    flexDirection: "row",
+  item: {
     alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1.5,
+    justifyContent: "center",
+    gap: 6,
+    width: 68,
+  },
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  addCircle: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderStyle: "dashed",
   },
   label: {
-    fontSize: 15,
-    fontWeight: "600",
+    fontSize: 13,
+    fontWeight: "700",
   },
 });
 
-/* ------------------------------------------------------------------ */
-/*  Radius Selector                                                    */
-/* ------------------------------------------------------------------ */
-
-function RadiusSelector({
-  selected,
-  onSelect,
+function FilterSummaryPill({
+  context,
+  radiusMeters,
+  priceFilter,
+  onPress,
 }: {
-  selected: number;
-  onSelect: (radius: number) => void;
+  context: FoodContext;
+  radiusMeters: number;
+  priceFilter: PriceFilter;
+  onPress: () => void;
 }) {
   const theme = useTheme();
-  const selectedLabel =
-    RADIUS_OPTIONS.find((option) => option.meters === selected)?.label ??
-    `${selected / 1000} km`;
-  const { width } = useWindowDimensions();
-  const isSmallDevice = width <= 375;
+  const contextLabel = categoryLabel(context);
+  const priceLabel = formatPriceLabel(priceFilter);
 
   return (
-    <View style={radiusStyles.container}>
-      <View style={radiusStyles.header}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        filterPillStyles.container,
+        { backgroundColor: theme.backgroundElement },
+        pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+      ]}
+    >
+      <View style={filterPillStyles.left}>
+        <Ionicons name="location-outline" size={20} color={theme.text} />
+        <ThemedText style={[filterPillStyles.radiusText, { color: theme.text }]}>
+          {i18n.t("home.within_radius", { radius: formatRadiusLabel(radiusMeters) })}
+        </ThemedText>
+      </View>
+
+      <View style={filterPillStyles.right}>
         <ThemedText
-          style={[radiusStyles.title, { color: theme.textSecondary }]}
+          style={[filterPillStyles.metaText, { color: theme.textSecondary }]}
+          numberOfLines={1}
         >
-          {i18n.t("home.radius_label")}
+          {contextLabel} · {priceLabel}
         </ThemedText>
-        <ThemedText style={[radiusStyles.value, { color: theme.text }]}>
-          {selectedLabel}
-        </ThemedText>
+        <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
       </View>
-
-      <View
-        style={[
-          radiusStyles.segmentedControl,
-          {
-            backgroundColor: theme.backgroundElement,
-            borderColor: theme.border,
-          },
-        ]}
-      >
-        {RADIUS_OPTIONS.map((option) => {
-          const isActive = selected === option.meters;
-
-          return (
-            <Pressable
-              key={option.meters}
-              onPress={() => {
-                Haptics.selectionAsync();
-                onSelect(option.meters);
-              }}
-              style={[
-                radiusStyles.option,
-                isActive && { backgroundColor: theme.accent },
-              ]}
-            >
-              <ThemedText
-                style={[
-                  radiusStyles.optionLabel,
-                  { color: isActive ? "#FFFFFF" : theme.textSecondary },
-                  isSmallDevice && { fontSize: 12 },
-                ]}
-              >
-                {option.label}
-              </ThemedText>
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
+    </Pressable>
   );
 }
 
-const radiusStyles = StyleSheet.create({
+const filterPillStyles = StyleSheet.create({
   container: {
-    width: "100%",
-    gap: 6,
-  },
-  header: {
+    minHeight: 58,
+    borderRadius: 18,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: Spacing.one,
+    gap: Spacing.two,
   },
-  title: {
-    fontSize: 12,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  value: {
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  segmentedControl: {
-    width: "100%",
+  left: {
     flexDirection: "row",
-    gap: 4,
-    padding: 4,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-  },
-  option: {
-    flex: 1,
-    minHeight: 36,
     alignItems: "center",
-    justifyContent: "center",
-    borderRadius: BorderRadius.lg,
+    gap: 10,
+    flexShrink: 0,
   },
-  optionLabel: {
+  radiusText: {
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  right: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    minWidth: 0,
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  metaText: {
     fontSize: 13,
     fontWeight: "700",
+    minWidth: 0,
+    flexShrink: 1,
   },
 });
 
@@ -389,29 +423,46 @@ export default function DiscoverScreen() {
     setActiveRestaurantId,
   } = useDiscoverContext();
 
+  const {
+    activeCategories,
+    availableCategories,
+    addCategory,
+    removeCategory,
+    isRemovable,
+  } = useCategories();
+
   const [error, setError] = useState<string | null>(null);
   const [context, setContext] = useState<FoodContext>("coffee");
   const [radiusMeters, setRadiusMeters] = useState(1000);
+  const [priceFilter, setPriceFilter] = useState<PriceFilter>("any");
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [categoryPickerVisible, setCategoryPickerVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showHint, setShowHint] = useState(true);
   const [entryOffset, setEntryOffset] = useState(0);
   const [locating, setLocating] = useState(false);
 
-  const subtitle = useRotatingText(SUGGESTIONS);
   const endOfResultsTracked = useRef(false);
   const lastPublishedRef = useRef<string | null>(null);
   const pickStartRef = useRef(0);
 
   const query = useRestaurantSearch(searchParams);
+  const rawRestaurantCount = query.data?.data.restaurants.length ?? 0;
 
-  const restaurants = useMemo(
-    () =>
-      applyPreferenceRanking(query.data?.data.restaurants ?? [], preferences),
-    [query.data, preferences],
-  );
+  const restaurants = useMemo(() => {
+    const ranked = applyPreferenceRanking(
+      query.data?.data.restaurants ?? [],
+      preferences,
+    );
+
+    if (priceFilter === "any") return ranked;
+
+    return ranked.filter((restaurant) => restaurant.priceLevel === priceFilter);
+  }, [query.data, preferences, priceFilter]);
 
   const hasResults = searchParams !== null && restaurants.length > 0;
   const loading = locating || query.isFetching;
+  const hasActiveFilters = radiusMeters !== 1000 || priceFilter !== "any";
 
   const floatY = useSharedValue(0);
 
@@ -451,6 +502,13 @@ export default function DiscoverScreen() {
       setError(i18n.t("home.error_no_options"));
     }
   }, [query.data, query.isSuccess]);
+
+  useEffect(() => {
+    if (!query.isSuccess || !searchParams) return;
+    if (rawRestaurantCount > 0 && restaurants.length === 0) {
+      setError(i18n.t("home.error_no_filtered_options"));
+    }
+  }, [query.isSuccess, rawRestaurantCount, restaurants.length, searchParams]);
 
   useEffect(() => {
     if (!query.isError) return;
@@ -632,6 +690,60 @@ export default function DiscoverScreen() {
     setError(null);
   }, [setSearchParams]);
 
+  const openFilters = useCallback(() => {
+    Haptics.selectionAsync();
+    setFiltersVisible(true);
+  }, []);
+
+  const handleRadiusChange = useCallback((nextRadius: number) => {
+    setError(null);
+    setRadiusMeters(nextRadius);
+  }, []);
+
+  const handlePriceChange = useCallback((nextPrice: PriceFilter) => {
+    setError(null);
+    setPriceFilter(nextPrice);
+  }, []);
+
+  const openCategoryPicker = useCallback(() => {
+    setCategoryPickerVisible(true);
+  }, []);
+
+  // Adding selects the new category straight away — the user tapped "+"
+  // because they want to pick with it, not just park it on the row.
+  const handleAddCategory = useCallback(
+    (category: FoodContext) => {
+      addCategory(category);
+      setContext(category);
+      setError(null);
+    },
+    [addCategory],
+  );
+
+  const handleRemoveCategory = useCallback(
+    (category: FoodContext) => {
+      removeCategory(category);
+      setContext((prev) => (prev === category ? "coffee" : prev));
+    },
+    [removeCategory],
+  );
+
+  // Nothing left in the pool — close the picker rather than leave an
+  // empty sheet on screen.
+  useEffect(() => {
+    if (categoryPickerVisible && availableCategories.length === 0) {
+      setCategoryPickerVisible(false);
+    }
+  }, [categoryPickerVisible, availableCategories.length]);
+
+  // Keeps `context` valid if the active list changes underneath it
+  // (removal, or a stored list that no longer contains it).
+  useEffect(() => {
+    if (activeCategories.length > 0 && !activeCategories.includes(context)) {
+      setContext(activeCategories[0]);
+    }
+  }, [activeCategories, context]);
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Native header toolbar button — only renders because this screen is
@@ -641,7 +753,7 @@ export default function DiscoverScreen() {
           would be unreachable from Discover on web. iOS uses Apple's own
           "gearshape" SF Symbol (same glyph as the system Settings app);
           SF Symbols don't exist on Android, so it keeps the image icon. */}
-      {Platform.OS !== "web" && (
+      {/* {Platform.OS !== "web" && (
         <Stack.Toolbar placement="right">
           <Stack.Toolbar.Button
             onPress={() => router.push("/settings")}
@@ -653,9 +765,26 @@ export default function DiscoverScreen() {
             tintColor={"black"}
           />
         </Stack.Toolbar>
-      )}
+      )} */}
 
       <SafeAreaView style={styles.safeArea}>
+        <FilterSheet
+          visible={filtersVisible}
+          context={context}
+          radiusMeters={radiusMeters}
+          priceFilter={priceFilter}
+          onClose={() => setFiltersVisible(false)}
+          onRadiusChange={handleRadiusChange}
+          onPriceChange={handlePriceChange}
+        />
+
+        <CategoryPickerSheet
+          visible={categoryPickerVisible}
+          available={availableCategories}
+          onAdd={handleAddCategory}
+          onClose={() => setCategoryPickerVisible(false)}
+        />
+
         {(hasResults || Platform.OS === "web") && (
           <View style={styles.topBar}>
             {hasResults ? (
@@ -751,29 +880,81 @@ export default function DiscoverScreen() {
           <>
             {/* ── Top: Identity Zone ── */}
             <View style={styles.identityZone}>
-              <Animated.View entering={FadeInDown.duration(600).delay(400)}>
-                <ThemedText
-                  style={[
-                    styles.title,
-                    { color: theme.text },
-                    isSmallDevice && { fontSize: 34, lineHeight: 40 },
+              <Animated.View
+                style={styles.homeHeader}
+                entering={FadeInDown.duration(600).delay(400)}
+              >
+                <View style={styles.brandRow}>
+                  <View style={[styles.logoMark, { backgroundColor: theme.accent }]}>
+                    <Coffee size={17} color="#FFFFFF" strokeWidth={2.4} />
+                  </View>
+                  <ThemedText style={[styles.brandText, { color: theme.text }]}>
+                    CupMap
+                  </ThemedText>
+                </View>
+
+                <Pressable
+                  onPress={openFilters}
+                  hitSlop={10}
+                  style={({ pressed }) => [
+                    styles.configButton,
+                    {
+                      backgroundColor: theme.backgroundElement,
+                      borderColor: theme.border,
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
                   ]}
                 >
-                  {i18n.t("home.title")}
+                  <Settings2 size={20} color={theme.text} strokeWidth={2.3} />
+                  {hasActiveFilters && (
+                    <View
+                      style={[
+                        styles.configDot,
+                        {
+                          backgroundColor: theme.accent,
+                          borderColor: theme.backgroundElement,
+                        },
+                      ]}
+                    />
+                  )}
+                </Pressable>
+              </Animated.View>
+
+              <Animated.View
+                style={styles.homeCopy}
+                entering={FadeInDown.duration(600).delay(600)}
+              >
+                <ThemedText
+                  style={[
+                    styles.homeTitle,
+                    { color: theme.text },
+                    isSmallDevice && { fontSize: 26, lineHeight: 32 },
+                  ]}
+                >
+                  Find a great spot
                 </ThemedText>
               </Animated.View>
 
-              <Animated.View entering={FadeInDown.duration(600).delay(600)}>
-                <ThemedText
-                  style={[
-                    styles.subtitle,
-                    { color: theme.textSecondary },
-                    isSmallDevice && { fontSize: 15 },
-                  ]}
-                  key={subtitle}
-                >
-                  {subtitle}
-                </ThemedText>
+              <Animated.View
+                style={styles.homeControls}
+                entering={FadeInDown.duration(600).delay(800)}
+              >
+                <ContextSelector
+                  categories={activeCategories}
+                  selected={context}
+                  onSelect={setContext}
+                  onRemove={handleRemoveCategory}
+                  onAdd={openCategoryPicker}
+                  canAdd={availableCategories.length > 0}
+                  isRemovable={isRemovable}
+                />
+
+                <FilterSummaryPill
+                  context={context}
+                  radiusMeters={radiusMeters}
+                  priceFilter={priceFilter}
+                  onPress={openFilters}
+                />
               </Animated.View>
             </View>
 
@@ -790,13 +971,6 @@ export default function DiscoverScreen() {
               ) : (
                 <>
                   <ErrorBanner error={error} onDismiss={() => setError(null)} />
-
-                  <ContextSelector selected={context} onSelect={setContext} />
-
-                  <RadiusSelector
-                    selected={radiusMeters}
-                    onSelect={setRadiusMeters}
-                  />
 
                   <PickButton onPress={handlePick} loading={loading} />
                 </>
@@ -833,33 +1007,71 @@ const styles = StyleSheet.create({
 
   /* ── Picker mode ── */
   identityZone: {
-    flex: 3.4,
-    alignItems: "center",
-    justifyContent: "flex-end",
+    flex: 1,
     paddingHorizontal: Spacing.four,
-    gap: Spacing.two,
+    paddingTop: Spacing.two,
+    gap: Spacing.four,
     paddingBottom: Spacing.four,
   },
-  title: {
-    fontSize: 42,
-    fontWeight: "800",
-    textAlign: "center",
-    lineHeight: 50,
-    letterSpacing: -1,
+  homeHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
   },
-  subtitle: {
-    fontSize: 17,
-    fontWeight: "500",
-    textAlign: "center",
-    marginTop: Spacing.one,
+  brandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  logoMark: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  brandText: {
+    fontSize: 18,
+    fontWeight: "800",
+    letterSpacing: -0.4,
+  },
+  configButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  configDot: {
+    position: "absolute",
+    top: -1,
+    right: -1,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+  },
+  homeCopy: {
+    gap: 8,
+  },
+  homeTitle: {
+    fontSize: 30,
+    fontWeight: "900",
+    lineHeight: 36,
+    letterSpacing: -0.4,
+  },
+  homeControls: {
+    gap: Spacing.four,
   },
   interactionZone: {
-    flex: 6.2,
+    flexShrink: 0,
     alignItems: "center",
     justifyContent: "flex-end",
     paddingHorizontal: Spacing.four,
     paddingBottom: Spacing.five,
-    gap: Spacing.five,
+    gap: Spacing.three,
   },
 
   /* ── Results mode (ported from the old result.tsx) ── */

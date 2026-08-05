@@ -15,7 +15,15 @@
     "error_location_denied": "Não foi possível obter sua localização. Verifique as permissões.",
     "permission_title": "Localização Necessária",
     "permission_subtitle": "CupMap precisa da sua localização para encontrar os melhores lugares perto de você.",
-    "permission_button": "Abrir Configurações"
+    "permission_button": "Abrir Configurações",
+    "category_add_label": "Adicionar",
+    "category_add_title": "Adicionar uma categoria",
+    "category_add_subtitle": "Escolha o que mais quer no seu ecrã inicial.",
+    "category_remove_hint": "Mantenha premida uma categoria para a remover.",
+    "category_remove_title": "Remover %{category}?",
+    "category_remove_message": "Pode adicioná-la novamente a qualquer momento pelo botão +.",
+    "category_remove_cancel": "Cancelar",
+    "category_remove_confirm": "Remover"
   },
   "result": {
     "swipe_hint": "← Deslize para mais opções →",

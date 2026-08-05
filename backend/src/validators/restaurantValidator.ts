@@ -1,6 +1,13 @@
 import { z } from "zod";
 
-export const FoodContext = z.enum(["food", "coffee", "quick_bite"]);
+export const FoodContext = z.enum([
+  "food",
+  "coffee",
+  "dessert",
+  "drinks",
+  "brunch",
+  "bakery",
+]);
 export type FoodContextType = z.infer<typeof FoodContext>;
 
 export const pickRequestSchema = z.object({

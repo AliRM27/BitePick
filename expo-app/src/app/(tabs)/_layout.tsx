@@ -18,10 +18,7 @@ export default function TabsLayout() {
   const theme = useTheme();
 
   return (
-    <NativeTabs
-      tintColor={theme.accent}
-      backgroundColor={theme.background}
-    >
+    <NativeTabs tintColor={theme.accent} backgroundColor={theme.background}>
       <NativeTabs.Trigger name="(discover)">
         <NativeTabs.Trigger.Icon
           sf={{ default: "safari", selected: "safari.fill" }}
@@ -37,7 +34,9 @@ export default function TabsLayout() {
           sf={{ default: "map", selected: "map.fill" }}
           md="map"
         />
-        <NativeTabs.Trigger.Label>{i18n.t("tabs.map")}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>
+          {i18n.t("tabs.map")}
+        </NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="saved">
@@ -47,6 +46,15 @@ export default function TabsLayout() {
         />
         <NativeTabs.Trigger.Label>
           {i18n.t("tabs.saved")}
+        </NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="(profile)">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: "person", selected: "person.fill" }}
+          md="person"
+        />
+        <NativeTabs.Trigger.Label>
+          {i18n.t("tabs.profile")}
         </NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>

@@ -26,7 +26,23 @@ export interface PlaceResult {
 const CONTEXT_TYPE_MAP: Record<FoodContextType, string[]> = {
   food: ["restaurant"],
   coffee: ["cafe", "bakery", "coffee_shop"],
-  quick_bite: ["fast_food_restaurant", "meal_takeaway", "sandwich_shop"],
+  dessert: [
+    "dessert_shop",
+    "dessert_restaurant",
+    "ice_cream_shop",
+    "cake_shop",
+    "donut_shop",
+  ],
+  drinks: [
+    "bar",
+    "pub",
+    "wine_bar",
+    "cocktail_bar",
+    "brewpub",
+    "beer_garden",
+  ],
+  brunch: ["brunch_restaurant", "breakfast_restaurant", "cafe", "bakery"],
+  bakery: ["bakery", "bagel_shop", "pastry_shop", "donut_shop"],
 };
 
 /* ------------------------------------------------------------------ */
@@ -40,7 +56,27 @@ const CONTEXT_TYPE_MAP: Record<FoodContextType, string[]> = {
 const STRICT_CONTEXT_FILTERS: Record<FoodContextType, string[]> = {
   coffee: ["cafe", "coffee_shop", "bakery"],
   food: ["restaurant"],
-  quick_bite: ["fast_food_restaurant", "meal_takeaway", "restaurant"],
+  dessert: [
+    "dessert_shop",
+    "dessert_restaurant",
+    "ice_cream_shop",
+    "cake_shop",
+    "candy_store",
+    "chocolate_shop",
+    "confectionery",
+    "donut_shop",
+  ],
+  drinks: [
+    "bar",
+    "pub",
+    "wine_bar",
+    "cocktail_bar",
+    "brewery",
+    "brewpub",
+    "beer_garden",
+  ],
+  brunch: ["brunch_restaurant", "breakfast_restaurant", "cafe", "bakery"],
+  bakery: ["bakery", "bagel_shop", "pastry_shop", "donut_shop"],
 };
 
 /** Places that should never appear regardless of context */
@@ -74,7 +110,7 @@ const PLACES_BASE = "https://places.googleapis.com/v1/places:searchNearby";
  * Fetches nearby places from the Google Places API (New).
  * Uses the `searchNearby` endpoint with field masks for efficiency.
  *
- * @param context - The food context to search for (food, coffee, quick_bite)
+ * @param context - The food context to search for.
  */
 export async function fetchNearbyRestaurants(
   lat: number,

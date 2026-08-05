@@ -15,7 +15,15 @@
     "error_location_denied": "위치를 가져올 수 없습니다. 권한을 확인해주세요.",
     "permission_title": "위치 필요",
     "permission_subtitle": "CupMap은 주변 최고의 장소를 찾기 위해 위치 정보가 필요합니다.",
-    "permission_button": "설정 열기"
+    "permission_button": "설정 열기",
+    "category_add_label": "추가",
+    "category_add_title": "카테고리 추가",
+    "category_add_subtitle": "홈 화면에 표시할 항목을 선택하세요.",
+    "category_remove_hint": "카테고리를 길게 눌러 삭제하세요.",
+    "category_remove_title": "%{category}을(를) 삭제할까요?",
+    "category_remove_message": "+ 버튼으로 언제든 다시 추가할 수 있습니다.",
+    "category_remove_cancel": "취소",
+    "category_remove_confirm": "삭제"
   },
   "result": {
     "swipe_hint": "← 스와이프하여 더 보기 →",

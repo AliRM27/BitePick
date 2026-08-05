@@ -15,7 +15,15 @@
     "error_location_denied": "Standort konnte nicht ermittelt werden. Berechtigungen prüfen.",
     "permission_title": "Standort Erforderlich",
     "permission_subtitle": "CupMap benötigt deinen Standort, um die besten Orte in deiner Nähe zu finden.",
-    "permission_button": "Einstellungen Öffnen"
+    "permission_button": "Einstellungen Öffnen",
+    "category_add_label": "Hinzufügen",
+    "category_add_title": "Kategorie hinzufügen",
+    "category_add_subtitle": "Wähle, was sonst noch auf deinen Startbildschirm soll.",
+    "category_remove_hint": "Kategorie lange drücken, um sie zu entfernen.",
+    "category_remove_title": "%{category} entfernen?",
+    "category_remove_message": "Du kannst sie jederzeit über die Schaltfläche + wieder hinzufügen.",
+    "category_remove_cancel": "Abbrechen",
+    "category_remove_confirm": "Entfernen"
   },
   "result": {
     "swipe_hint": "← Wischen für mehr Auswahl →",

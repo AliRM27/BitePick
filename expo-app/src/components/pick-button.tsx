@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -6,16 +6,13 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withRepeat,
-  withTiming,
   withSpring,
 } from "react-native-reanimated";
-import { UtensilsCrossed } from "lucide-react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Spacing } from "@/constants/theme";
@@ -98,7 +95,7 @@ export function PickButton({
             >
               {i18n.t("components.pick_button")}
             </ThemedText>
-            {/* <UtensilsCrossed size={30} color="#FFFFFF" /> */}
+            <Ionicons name="arrow-forward" size={24} color="#FFFFFF" />
           </View>
         )}
       </AnimatedPressable>

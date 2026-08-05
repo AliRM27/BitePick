@@ -15,7 +15,15 @@
     "error_location_denied": "无法获取位置信息，请检查权限后重试。",
     "permission_title": "需要位置",
     "permission_subtitle": "CupMap 需要您的位置来寻找周围最好的去处。",
-    "permission_button": "打开设置"
+    "permission_button": "打开设置",
+    "category_add_label": "添加",
+    "category_add_title": "添加分类",
+    "category_add_subtitle": "选择你还想在主屏幕上显示的内容。",
+    "category_remove_hint": "长按分类即可移除。",
+    "category_remove_title": "移除%{category}？",
+    "category_remove_message": "你随时可以通过 + 按钮重新添加。",
+    "category_remove_cancel": "取消",
+    "category_remove_confirm": "移除"
   },
   "result": {
     "swipe_hint": "← 滑动查看更多选择 →",

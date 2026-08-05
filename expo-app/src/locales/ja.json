@@ -15,7 +15,15 @@
     "error_location_denied": "位置情報を取得できません。権限を確認してください。",
     "permission_title": "位置情報が必要です",
     "permission_subtitle": "CupMapは、近くの最高のスポットを見つけるために位置情報を必要とします。",
-    "permission_button": "設定を開く"
+    "permission_button": "設定を開く",
+    "category_add_label": "追加",
+    "category_add_title": "カテゴリを追加",
+    "category_add_subtitle": "ホーム画面に表示したいものを選んでください。",
+    "category_remove_hint": "長押しでカテゴリを削除できます。",
+    "category_remove_title": "%{category}を削除しますか？",
+    "category_remove_message": "＋ボタンからいつでも追加し直せます。",
+    "category_remove_cancel": "キャンセル",
+    "category_remove_confirm": "削除"
   },
   "result": {
     "swipe_hint": "← スワイプして他の候補を見る →",
